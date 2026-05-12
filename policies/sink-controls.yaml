@@ -1,0 +1,17 @@
+allowed_destinations:
+  - host: upstart.com
+    purpose: approved_public_domain
+  - host: upstartnetwork.com
+    purpose: approved_public_domain
+blocked_schemes:
+  - javascript
+  - data
+  - file
+  - ftp
+default_policy: deny
+blocked_renderings:
+  - markdown_image
+  - html_img
+  - iframe
+  - script
+  - form_post

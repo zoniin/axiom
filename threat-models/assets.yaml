@@ -1,0 +1,21 @@
+assets:
+  - id: borrower_pii
+    name: Borrower PII and NPI
+    sensitivity: critical
+    examples: [ssn, date_of_birth, bank_account, income_docs]
+  - id: loan_terms
+    name: Loan terms and policy outputs
+    sensitivity: high
+    examples: [apr, approval_status, adverse_action_reason, fees]
+  - id: tenant_data
+    name: Tenant and partner scoped data
+    sensitivity: critical
+    examples: [partner_reports, borrower_records, lender_configs]
+  - id: system_prompts
+    name: System prompts and model configuration
+    sensitivity: high
+    examples: [developer_policy, model_routes, rule_bundles]
+  - id: audit_logs
+    name: Axiom audit logs
+    sensitivity: high
+    examples: [policy_decisions, retrieved_chunks, sink_attempts]

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AxiomRule",
+  "type": "object",
+  "required": ["id", "name", "severity", "action"],
+  "properties": {
+    "id": {"type": "string"},
+    "name": {"type": "string"},
+    "severity": {"enum": ["low", "medium", "high", "critical"]},
+    "action": {"enum": ["allow", "block", "escalate"]},
+    "applies_to": {"type": "array", "items": {"type": "string"}}
+  }
+}

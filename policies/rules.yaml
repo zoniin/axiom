@@ -1,0 +1,36 @@
+rules:
+  - id: AX-PI-001
+    name: Block markdown and HTML image auto-fetch
+    severity: critical
+    action: block
+    applies_to: [output, sink]
+  - id: AX-PI-002
+    name: Block unapproved outbound destination
+    severity: critical
+    action: block
+    applies_to: [sink]
+  - id: AX-PI-003
+    name: Block sensitive data in URL or sink args
+    severity: critical
+    action: block
+    applies_to: [sink]
+  - id: AX-PI-004
+    name: Block cross-tenant retrieved chunks
+    severity: critical
+    action: block
+    applies_to: [retrieval]
+  - id: AX-PI-005
+    name: Escalate tainted content influencing sensitive sink
+    severity: high
+    action: escalate
+    applies_to: [sink, memory]
+  - id: AX-PI-006
+    name: Escalate unsupported financial commitment
+    severity: high
+    action: escalate
+    applies_to: [output]
+  - id: AX-PI-007
+    name: Detect direct instruction override
+    severity: medium
+    action: escalate
+    applies_to: [input]

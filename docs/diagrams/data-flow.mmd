@@ -1,0 +1,10 @@
+flowchart LR
+  Client[Client App] --> Gateway[Axiom Gateway]
+  Gateway --> Normalize[Normalize/Sanitize]
+  Normalize --> Policy[Policy Engine]
+  Policy --> Retrieve[Retrieval ACL]
+  Retrieve --> Model[LLM]
+  Model --> Output[Output Filter]
+  Output --> Sink[Sink Gate]
+  Sink --> Client
+  Gateway --> Audit[(Audit Log)]

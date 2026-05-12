@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AxiomAuditEvent",
+  "type": "object",
+  "required": ["eventId", "timestamp", "tenantId", "decision", "ruleResults"],
+  "properties": {
+    "eventId": {"type": "string"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "tenantId": {"type": "string"},
+    "userId": {"type": "string"},
+    "sessionId": {"type": "string"},
+    "decision": {"enum": ["allow", "block", "escalate"]},
+    "ruleResults": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ruleId", "matched", "action"],
+        "properties": {
+          "ruleId": {"type": "string"},
+          "matched": {"type": "boolean"},
+          "action": {"enum": ["allow", "block", "escalate", "none"]},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "retrievedChunkIds": {"type": "array", "items": {"type": "string"}},
+    "proposedSinks": {"type": "array"},
+    "hashPrev": {"type": "string"}
+  }
+}
