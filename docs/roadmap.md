@@ -1,6 +1,6 @@
 # Roadmap
 
-## Done (v0.2)
+## Done (v0.3)
 
 - Deterministic engine with a decision lattice, locked rules and fail-closed errors
 - Retrieval authorization (tenant, role, clearance) before anything else runs
@@ -12,11 +12,13 @@
 - Hash-chained audit log with verification and resume
 - Detector adapter with feature flag and timeout
 - HTTP gateway, CLI, red-team harness with a generated report
+- Streaming output guard with prefix-stability checking
+- Property-based fuzzing of the security invariants
+- Runtime-agnostic core and a browser playground on GitHub Pages
 
 ## Next
 
 - **OpenTelemetry spans** per evaluation, using GenAI semantic conventions
-- **Streaming output checks**: incremental scanning so sanitization works on streamed tokens
 - **Reference detector adapters** (Prompt Guard, a hosted classifier) shipped as optional packages
 - **Per-tenant policy bundles**, signed, with hot reload
 - **Multilingual injection patterns**, starting with the known-gap scenarios

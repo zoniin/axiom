@@ -1,6 +1,6 @@
 {
   "name": "axiom-guard",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Deterministic, provenance-aware runtime security gateway for LLM applications: prompt injection, exfiltration, and sink control.",
   "license": "MIT",
   "type": "module",
@@ -37,7 +37,10 @@
     "serve": "tsx src/cli.ts serve",
     "example": "tsx examples/rag-pipeline.ts",
     "schemas": "tsx scripts/emit-schemas.ts",
-    "check": "npm run typecheck && npm test && npm run harness"
+    "check": "npm run playground:build && npm run typecheck && npm test && npm run harness",
+    "bench": "tsx scripts/bench.ts",
+    "playground:build": "tsx playground/build.ts",
+    "playground": "tsx playground/build.ts && tsx playground/serve.ts"
   },
   "keywords": [
     "llm",
@@ -56,6 +59,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
+    "esbuild": "^0.28.2",
     "fast-check": "^4.10.3",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
@@ -64,5 +68,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zoniin/axiom.git"
-  }
+  },
+  "homepage": "https://zoniin.github.io/axiom/"
 }

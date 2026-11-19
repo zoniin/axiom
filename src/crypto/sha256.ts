@@ -15,7 +15,24 @@ const K = new Uint32Array([
 
 const encoder = new TextEncoder();
 
+type NodeCrypto = { createHash(alg: string): { update(s: string, enc: string): { digest(enc: string): string } } };
+// Native hashing when running on Node (≈10x faster). `getBuiltinModule` is synchronous and
+// keeps this file free of static Node imports, so browsers and edge runtimes use the fallback.
+const nodeCrypto: NodeCrypto | undefined = (() => {
+  try {
+    const proc = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process;
+    return proc?.getBuiltinModule?.('node:crypto') as NodeCrypto | undefined;
+  } catch {
+    return undefined;
+  }
+})();
+
 export function sha256Hex(text: string): string {
+  return nodeCrypto ? nodeCrypto.createHash('sha256').update(text, 'utf8').digest('hex') : sha256HexPortable(text);
+}
+
+/** Pure TypeScript implementation; exported so tests can check it against the native one. */
+export function sha256HexPortable(text: string): string {
   const data = encoder.encode(text);
   const bitLen = data.length * 8;
   const padded = new Uint8Array((((data.length + 9 + 63) >> 6) << 6));
@@ -36,7 +53,7 @@ export function sha256Hex(text: string): string {
       const s1 = rotr(b, 17) ^ rotr(b, 19) ^ (b >>> 10);
       w[i] = (w[i - 16]! + s0 + w[i - 7]! + s1) >>> 0;
     }
-    let [a, b, c, d, e, f, g, hh] = h as unknown as [number, number, number, number, number, number, number, number];
+    let a = h[0]!, b = h[1]!, c = h[2]!, d = h[3]!, e = h[4]!, f = h[5]!, g = h[6]!, hh = h[7]!;
     for (let i = 0; i < 64; i++) {
       const t1 = (hh + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[i]! + w[i]!) >>> 0;
       const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) >>> 0;

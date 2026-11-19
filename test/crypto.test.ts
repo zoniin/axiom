@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { sha256Hex } from '../src/crypto/sha256.js';
+import { sha256Hex as native, sha256HexPortable as sha256Hex } from '../src/crypto/sha256.js';
 
 const node = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
 
@@ -14,6 +14,7 @@ describe('sha256Hex', () => {
       const s = 'é🔒a'.repeat(n).slice(0, n);
       expect(sha256Hex(s)).toBe(node(s));
     }
+    expect(native('abc')).toBe(sha256Hex('abc'));
     const big = 'x'.repeat(100_000);
     expect(sha256Hex(big)).toBe(node(big));
   });

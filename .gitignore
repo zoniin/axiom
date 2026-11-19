@@ -4,3 +4,5 @@ coverage/
 *.log
 audit*.jsonl
 .env
+playground/dist/
+playground/data.gen.ts

