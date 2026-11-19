@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 import { Axiom } from './engine.js';
-import { loadPolicyFile } from './policy.js';
+import { loadPolicyFile } from './policy-file.js';
 import { EvaluateRequestSchema } from './schema.js';
 import type { Decision, EvaluateRequest } from './types.js';
 

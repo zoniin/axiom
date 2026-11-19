@@ -9,6 +9,7 @@ export interface UrlCheck {
   url?: URL;
 }
 
+const utf8 = new TextDecoder();
 const IPV4 = /^\d{1,3}(\.\d{1,3}){3}$/;
 
 /**
@@ -83,7 +84,8 @@ export function safeDecode(s: string): string {
 export function tryBase64(s: string): string | undefined {
   if (s.length < 12 || !/^[A-Za-z0-9+/_-]+={0,2}$/.test(s)) return undefined;
   try {
-    const decoded = Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+    const binary = atob(s.replace(/-/g, '+').replace(/_/g, '/'));
+    const decoded = utf8.decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
     const printable = decoded.replace(/[^\x20-\x7E\n\t]/g, '');
     return printable.length >= decoded.length * 0.9 && printable.length >= 6 ? decoded : undefined;
   } catch {

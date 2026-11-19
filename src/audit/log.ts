@@ -1,5 +1,4 @@
-import { createHash } from 'node:crypto';
-import { appendFileSync, existsSync, readFileSync } from 'node:fs';
+import { sha256Hex } from '../crypto/sha256.js';
 import { canonicalJson } from '../policy.js';
 import type { AuditEvent } from './event.js';
 
@@ -16,25 +15,15 @@ export class MemoryAuditSink implements AuditSink {
   }
 }
 
-/** Append-only JSON Lines file. Writes are synchronous so a decision is never returned before it is logged. */
-export class JsonlAuditSink implements AuditSink {
-  constructor(readonly path: string) {}
-  write(event: AuditEvent): void {
-    appendFileSync(this.path, `${JSON.stringify(event)}\n`, 'utf8');
-  }
-  /** Reads existing events, so a restarted gateway can continue the hash chain. */
-  readAll(): AuditEvent[] {
-    if (!existsSync(this.path)) return [];
-    return readFileSync(this.path, 'utf8')
-      .split('\n')
-      .filter((l) => l.trim())
-      .map((l) => JSON.parse(l) as AuditEvent);
-  }
+/** A sink that can read back what it wrote, so a restarted process can continue the chain. */
+export interface ReadableAuditSink extends AuditSink {
+  readonly path?: string;
+  readAll(): AuditEvent[];
 }
 
 export function hashEvent(event: AuditEvent): string {
   const { hash: _omit, ...rest } = event;
-  return createHash('sha256').update(canonicalJson(rest)).digest('hex');
+  return sha256Hex(canonicalJson(rest));
 }
 
 /**
@@ -53,12 +42,12 @@ export class AuditLog {
     this.prevHash = resumeFrom?.hash ?? GENESIS_HASH;
   }
 
-  static resume(sink: JsonlAuditSink, extra: AuditSink[] = []): AuditLog {
+  static resume(sink: ReadableAuditSink, extra: AuditSink[] = []): AuditLog {
     const events = sink.readAll();
     const last = events.at(-1);
     if (events.length > 0) {
       const v = verifyChain(events);
-      if (!v.ok) throw new Error(`Refusing to append to corrupted audit log ${sink.path}: ${v.error}`);
+      if (!v.ok) throw new Error(`Refusing to append to corrupted audit log ${sink.path ?? ''}: ${v.error}`);
     }
     return new AuditLog([sink, ...extra], last?.seq !== undefined && last.hash ? { seq: last.seq, hash: last.hash } : undefined);
   }

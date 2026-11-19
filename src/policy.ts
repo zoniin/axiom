@@ -1,7 +1,5 @@
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import { sha256Hex } from './crypto/sha256.js';
 
 /**
  * Policy configuration. Every field has a safe default, so `{}` is a valid,
@@ -120,15 +118,9 @@ export function parsePolicy(input: unknown): Policy {
   return PolicySchema.parse(input ?? {});
 }
 
-export function loadPolicyFile(path: string): Policy {
-  const raw = readFileSync(path, 'utf8');
-  const data = path.endsWith('.json') ? JSON.parse(raw) : parseYaml(raw);
-  return parsePolicy(data);
-}
-
 /** Stable SHA-256 of the effective policy, recorded in every audit event. */
 export function policyHash(policy: Policy): string {
-  return createHash('sha256').update(canonicalJson(policy)).digest('hex');
+  return sha256Hex(canonicalJson(policy));
 }
 
 /** JSON with sorted keys, so hashes don't depend on property order. */

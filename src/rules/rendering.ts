@@ -12,7 +12,10 @@ export const activeContent: Rule = {
     'Markdown images, reference images, active HTML (img, iframe, script, svg, meta refresh, forms), event handlers, CSS url() and javascript:/data:/vbscript:/file: URIs. Renderers fetch these with no user interaction, which makes them the primary zero-click exfiltration channel.',
   evaluate(ctx) {
     if (!ctx.request.output) return [];
-    const found = findActiveContent(stripHidden(ctx.request.output));
+    // Check both forms: stripping invisible characters can create or destroy token boundaries.
+    const raw = ctx.request.output;
+    const stripped = stripHidden(raw);
+    const found = [...findActiveContent(stripped), ...(stripped === raw ? [] : findActiveContent(raw))];
     if (found.length === 0) return [];
     const kinds = [...new Set(found.map((f) => f.kind))];
     return [

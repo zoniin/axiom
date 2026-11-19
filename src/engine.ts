@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from 'node:crypto';
+import { sha256Hex } from './crypto/sha256.js';
 import { AUDIT_SCHEMA, type AuditEvent } from './audit/event.js';
 import type { AuditLog } from './audit/log.js';
 import { reduceDecisions, stricter } from './decision.js';
@@ -8,8 +8,9 @@ import { canonicalJson, DLP_DETECTORS, parsePolicy, policyHash, type Policy, typ
 import { AUTHORIZATION_RULES, CONTENT_RULES, SYSTEM_RULES } from './rules/index.js';
 import type { Rule, RuleContext } from './rules/rule.js';
 import { EvaluateRequestSchema } from './schema.js';
+import { StreamGuard } from './stream.js';
 import { redactSensitive } from './text/dlp.js';
-import { defangLinks, findActiveContent, stripActiveContent } from './text/markdown.js';
+import { defangLinks, findActiveContent, neutralize, stripActiveContent } from './text/markdown.js';
 import { normalizeForMatching, stripHidden } from './text/normalize.js';
 import type {
   ActionVerdict,
@@ -57,21 +58,29 @@ export class Axiom {
     validateOverrides(this.policy, this.rules);
     this.policyHash = policyHash(this.policy);
     this.clock = options.clock ?? (() => new Date());
-    this.idGenerator = options.idGenerator ?? randomUUID;
+    this.idGenerator = options.idGenerator ?? (() => globalThis.crypto.randomUUID());
     this.detectors = (options.detectors ?? []).filter((d) => this.policy.detectors.enabled.includes(d.id));
     this.audit = options.audit;
   }
 
-  /** Deterministic evaluation using built-in rules only. */
-  evaluate(request: EvaluateRequest): EvaluateResult {
-    return this.finish(request, this.runRules(request), []);
+  /**
+   * Deterministic evaluation using the configured rules.
+   * `audit: false` is for intermediate checks (e.g. streaming) whose final decision is audited separately.
+   */
+  evaluate(request: EvaluateRequest, options: { audit?: boolean } = {}): EvaluateResult {
+    return this.finish(request, this.runRules(request), [], options.audit !== false);
+  }
+
+  /** Guards streamed output. See `StreamGuard`. */
+  stream(base: Omit<EvaluateRequest, 'output' | 'actions'>): StreamGuard {
+    return new StreamGuard(this, base);
   }
 
   /** Built-in rules plus enabled detectors. Detectors can only add findings, never remove them. */
   async evaluateWithDetectors(request: EvaluateRequest): Promise<EvaluateResult> {
     const pass = this.runRules(request);
     const extra = await runDetectors(this.detectors, pass.request, this.policy.detectors.timeoutMs);
-    return this.finish(request, pass, extra);
+    return this.finish(request, pass, extra, true);
   }
 
   private runRules(raw: EvaluateRequest): RulePass {
@@ -147,7 +156,7 @@ export class Axiom {
     return finding;
   }
 
-  private finish(raw: EvaluateRequest, pass: RulePass, extra: Finding[]): EvaluateResult {
+  private finish(raw: EvaluateRequest, pass: RulePass, extra: Finding[], audit: boolean): EvaluateResult {
     const { request, dropped, authorized: authorizedChunks, tainted } = pass;
     const findings = [...pass.findings, ...extra];
     const rulesEvaluated = extra.length > 0 ? [...pass.evaluated, SYSTEM_RULES.detectorSignal] : pass.evaluated;
@@ -186,7 +195,7 @@ export class Axiom {
       const sanitized = sanitizeOutput(request.output, this.policy);
       result.output = { sanitized, modified: sanitized !== request.output };
     }
-    if (this.audit) result.audit = this.audit.append(result.audit);
+    if (this.audit && audit) result.audit = this.audit.append(result.audit);
     return result;
   }
 
@@ -208,7 +217,7 @@ export class Axiom {
       tenantId: request.tenantId,
       decision,
       policy: { name: this.policy.name, hash: this.policyHash },
-      requestDigest: createHash('sha256').update(canonicalJson(raw)).digest('hex'),
+      requestDigest: sha256Hex(canonicalJson(raw)),
       rulesEvaluated,
       findings: findings.map((f) => {
         const out: AuditEvent['findings'][number] = { ruleId: f.ruleId, action: f.action, severity: f.severity, target: f.target, message: f.message };
@@ -252,11 +261,24 @@ export function spotlight(c: ContextChunk): string {
 
 /** Produces the safe-to-render version of model output. */
 export function sanitizeOutput(output: string, policy: Policy): string {
+  // Each step can expose input for another (a redaction marker next to `(url)` forms a link),
+  // so run to a fixpoint. Converging makes the result idempotent.
+  let t = output;
+  for (let i = 0; i < 8; i++) {
+    const next = sanitizeOnce(t, policy);
+    if (next === t) return t;
+    t = next;
+  }
+  return neutralize(t);
+}
+
+function sanitizeOnce(output: string, policy: Policy): string {
   let t = stripHidden(output);
   if (findActiveContent(t).length > 0) t = stripActiveContent(t);
   t = defangLinks(t, policy.rendering.linkAllowHosts).text;
   t = redactSensitive(t, policy.dlp.detectors).text;
   for (const c of policy.canaries) t = t.split(c).join('[REDACTED:canary]');
+  if (findActiveContent(t).length > 0) t = stripActiveContent(t);
   return t;
 }
 

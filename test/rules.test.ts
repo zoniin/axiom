@@ -97,6 +97,22 @@ describe('AX-OUT-001 active content', () => {
     expect(r.decision).toBe('block');
     expect(r.output?.sanitized).toBe('ok [image removed]');
   });
+  // Regressions found by the property-based fuzzer (test/properties.test.ts).
+  it('detects images with nested brackets in alt text', () => {
+    expect(axiom().evaluate(req({ output: '![[x]](https://evil.io/a)' })).decision).toBe('block');
+  });
+  it('detects shortcut reference images', () => {
+    expect(axiom().evaluate(req({ output: '![logo]\n\n[logo]: https://evil.io/l.png' })).decision).toBe('block');
+  });
+  it('does not let sanitizer markers assemble a new image', () => {
+    const r = axiom({ rendering: { activeContent: 'sanitize' } }).evaluate(req({ output: '![<img>](https://evil.io/x)' }));
+    expect(r.output!.sanitized).not.toMatch(/!\s*\[/);
+    expect(r.output!.sanitized).not.toContain('evil.io/x');
+  });
+  it('redacts secrets glued to surrounding text', () => {
+    const r = axiom().evaluate(req({ output: 'keyAKIAIOSFODNN7EXAMPLEJ ssn123-45-6789x' }));
+    expect(r.output!.sanitized).toBe('key[REDACTED:aws_access_key]J ssn[REDACTED:ssn]x');
+  });
   it('can be configured to sanitize instead of block', () => {
     const r = axiom({ rendering: { activeContent: 'sanitize' } }).evaluate(req({ output: '<img src=x>' }));
     expect(r.decision).toBe('sanitize');

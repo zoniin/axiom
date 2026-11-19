@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
-import { AuditLog, JsonlAuditSink, verifyChain } from './audit/log.js';
+import { JsonlAuditSink } from './audit/jsonl.js';
+import { AuditLog, verifyChain } from './audit/log.js';
 import { Axiom } from './engine.js';
-import { loadPolicyFile, type Policy } from './policy.js';
+import type { Policy } from './policy.js';
+import { loadPolicyFile } from './policy-file.js';
 import type { EvaluateResult } from './types.js';
 
 const HELP = `axiom: deterministic runtime security for LLM apps

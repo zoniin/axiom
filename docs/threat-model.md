@@ -52,6 +52,11 @@ These are listed so nobody mistakes Axiom for something it isn't. The
 - **Free-text personal data.** DLP finds structured identifiers. "Jane Doe
   earns 85000" sent to an approved host isn't detected. That needs
   field-level data classification upstream.
+- **Digit-glued identifiers.** SSN and card detectors require a non-digit on
+  each side, so `123-45-67890` or two card numbers run together aren't
+  flagged. Dropping the boundary would redact date-like IDs such as
+  `2023-12-1234`. Cloud keys have no such boundary and are caught wherever
+  they appear.
 - **Data in an approved destination's path.** Paths on allowlisted hosts are
   scanned for structured identifiers, not for arbitrary encodings. Keep
   `pathPrefix` tight.

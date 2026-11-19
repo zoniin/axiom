@@ -22,21 +22,22 @@ const DETECTORS: Detector[] = [
   {
     id: 'ssn',
     // Area 000, 666 and 900-999 are never issued; group 00 and serial 0000 are invalid.
-    pattern: /\b(?!000|666|9\d\d)\d{3}([- ])(?!00)\d{2}\1(?!0000)\d{4}\b/g,
+    pattern: /(?<!\d)(?!000|666|9\d\d)\d{3}([- ])(?!00)\d{2}\1(?!0000)\d{4}(?!\d)/g,
   },
   {
     id: 'credit_card',
-    pattern: /\b(?:\d[ -]?){12,18}\d\b/g,
+    pattern: /(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)/g,
     validate: (m) => {
       const digits = m.replace(/\D/g, '');
       return digits.length >= 13 && digits.length <= 19 && luhn(digits) && /^[3-6]/.test(digits);
     },
   },
-  { id: 'aws_access_key', pattern: /\b(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}\b/g },
+  // No boundaries: the prefix is distinctive enough, and gluing a key to other text must not hide it.
+  { id: 'aws_access_key', pattern: /(?:AKIA|ASIA|ABIA|ACCA)[0-9A-Z]{16}/g },
   { id: 'private_key', pattern: /-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY(?: BLOCK)?-----/g },
-  { id: 'github_token', pattern: /\b(?:gh[pousr]_[A-Za-z0-9]{36,255}|github_pat_[A-Za-z0-9_]{60,255})\b/g },
-  { id: 'slack_token', pattern: /\bxox[abprs]-[A-Za-z0-9-]{10,}\b/g },
-  { id: 'jwt', pattern: /\beyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b/g },
+  { id: 'github_token', pattern: /(?<![A-Za-z0-9_])(?:gh[pousr]_[A-Za-z0-9]{36,255}|github_pat_[A-Za-z0-9_]{60,255})(?![A-Za-z0-9_])/g },
+  { id: 'slack_token', pattern: /(?<![A-Za-z0-9])xox[abprs]-[A-Za-z0-9-]{10,}/g },
+  { id: 'jwt', pattern: /(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/g },
   { id: 'email_address', pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g },
   {
     id: 'iban',
