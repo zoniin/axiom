@@ -9,6 +9,9 @@
 - Installed-package smoke test (`npm run pack:test`) in CI: installs the packed tarball into an empty project and exercises every entry point and the CLI.
 - Installable from GitHub today: `npm install github:zoniin/axiom` (builds via `prepare`).
 
+### Fixed
+- Finding messages are now scrubbed for sensitive values, like evidence already was. Found by the fuzzer: a hostname-shaped string in model output carried an SSN into a link-defang message and from there into the audit log.
+
 ### Changed
 - Renamed to **Axiom Guard**. The CLI is now `axiom-guard` (was `axiom`, which collides with Axiom.co's CLI). Library API, rule IDs and audit format are unchanged.
 - Source maps embed their sources.

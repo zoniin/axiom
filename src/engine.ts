@@ -156,7 +156,8 @@ export class Axiom {
       action,
       severity: hit.severity ?? rule.severity,
       target: hit.target,
-      message: hit.message,
+      // Messages can quote attacker-controlled strings (hostnames, addresses), so they are scrubbed too.
+      message: redactSensitive(hit.message, DLP_DETECTORS).text,
     };
     if (hit.evidence !== undefined) finding.evidence = scrubEvidence(hit.evidence);
     return finding;

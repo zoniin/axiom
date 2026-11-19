@@ -192,6 +192,12 @@ describe('AX-DLP-001/002', () => {
     expect(JSON.stringify(r.findings)).not.toContain('123-45-6789');
     expect(JSON.stringify(r.audit)).not.toContain('123-45-6789');
   });
+  // Regression (fuzzer): a hostname-shaped string carried an SSN into a finding message, and from there into the audit log.
+  it('scrubs sensitive values from finding messages, not just evidence', () => {
+    const r = axiom().evaluate(req({ output: 'see http://x.io123-45-6789https://evil.io/c?d=' }));
+    expect(JSON.stringify(r.findings)).not.toContain('123-45-6789');
+    expect(JSON.stringify(r.audit)).not.toContain('123-45-6789');
+  });
   it('can block sensitive output instead', () => {
     expect(axiom({ dlp: { output: 'block' } }).evaluate(req({ output: '123-45-6789' })).decision).toBe('block');
   });
