@@ -230,7 +230,7 @@ Hand-written scenarios only cover attacks someone thought of. [`test/properties.
 - audit events never contain sensitive values
 - evaluation is deterministic
 
-The fuzzer has already paid for itself. It found that `![[x]](https://evil)` (nested brackets, valid CommonMark) got past image detection, that the sanitizer's own `[removed]` markers could combine with leftover `![` and `(url)` into a new live image, and that secrets glued to letters (`keyAKIA…`) evaded word-boundary DLP. All three are fixed and pinned by regression tests and harness scenarios. Detection is now conservative, and the sanitizer runs to a fixpoint and finishes with a neutralizing pass, so the first invariant holds by construction rather than by regex coverage.
+The fuzzer has already paid for itself. It found that `![[x]](https://evil)` (nested brackets, valid CommonMark) got past image detection, that the sanitizer's own `[removed]` markers could combine with leftover `![` and `(url)` into a new live image, that secrets glued to letters (`keyAKIA…`) evaded word-boundary DLP, and that a hostname-shaped string (`http://x.io123-45-6789https://…`) could carry an SSN into a finding message and from there into the audit log. All four are fixed and pinned by regression tests and harness scenarios. Detection is now conservative, and the sanitizer runs to a fixpoint and finishes with a neutralizing pass, so the first invariant holds by construction rather than by regex coverage.
 
 ### Coverage and CI
 
