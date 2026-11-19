@@ -55,7 +55,14 @@ async function runOne(d: Detector, target: string, text: string, timeoutMs: numb
   try {
     const r = await Promise.race([d.detect(text, { signal: controller.signal }), timeout]);
     if (r === 'timeout') {
-      return { ruleId: DETECTOR_RULE, stage: 'system', action: 'allow', severity: 'low', target, message: `Detector ${d.id} timed out after ${timeoutMs}ms; deterministic rules still apply.` };
+      return {
+        ruleId: DETECTOR_RULE,
+        stage: 'system',
+        action: 'allow',
+        severity: 'low',
+        target,
+        message: `Detector ${d.id} timed out after ${timeoutMs}ms; deterministic rules still apply.`,
+      };
     }
     if (!r.flagged) return undefined;
     const score = r.score !== undefined ? ` (score ${r.score.toFixed(2)})` : '';
@@ -68,7 +75,14 @@ async function runOne(d: Detector, target: string, text: string, timeoutMs: numb
       message: `Detector ${d.id} flagged ${r.label ?? 'content'}${score}.`,
     };
   } catch (err) {
-    return { ruleId: DETECTOR_RULE, stage: 'system', action: 'allow', severity: 'low', target, message: `Detector ${d.id} failed: ${err instanceof Error ? err.message : String(err)}.` };
+    return {
+      ruleId: DETECTOR_RULE,
+      stage: 'system',
+      action: 'allow',
+      severity: 'low',
+      target,
+      message: `Detector ${d.id} failed: ${err instanceof Error ? err.message : String(err)}.`,
+    };
   } finally {
     clearTimeout(timer);
   }

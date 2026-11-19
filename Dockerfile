@@ -12,7 +12,6 @@ COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 COPY policies ./policies
-COPY harness/policy.yaml ./harness/policy.yaml
 COPY harness/scenarios ./harness/scenarios
 USER node
 EXPOSE 8787

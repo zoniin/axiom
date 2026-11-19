@@ -1,0 +1,27 @@
+name: False positive or detection gap
+description: A benign request was escalated or blocked, or an attack that is a documented non-goal got through.
+labels: [detection]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ideal reports include the request as a harness scenario. See any file in `harness/scenarios/` for the format.
+        If this is a bypass of a locked rule (AX-CTX-001/002, AX-OUT-003, AX-ACT-*, AX-DLP-002), report it privately instead.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [False positive (benign traffic flagged), Detection gap (attack not flagged)]
+    validations: { required: true }
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Scenario
+      description: The request (JSON or harness YAML), the policy if not default, and the decision you expected.
+      render: yaml
+    validations: { required: true }
+  - type: textarea
+    id: result
+    attributes:
+      label: What Axiom returned
+      description: Output of `axiom check request.json`, or a playground screenshot.

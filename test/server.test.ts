@@ -3,7 +3,8 @@ import { createApp } from '../src/server.js';
 import { axiom } from './helpers.js';
 
 const app = createApp(axiom({ name: 'test' }));
-const post = (body: unknown) => app.request('/v1/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+const post = (body: unknown) =>
+  app.request('/v1/evaluate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 
 describe('HTTP API', () => {
   it('serves health with the policy hash', async () => {

@@ -7,12 +7,7 @@
 
 import { hostMatchesAny, safeDecode } from './urls.js';
 
-export type ActiveContentKind =
-  | 'markdown_image'
-  | 'html_active_tag'
-  | 'html_event_handler'
-  | 'dangerous_uri'
-  | 'css_url';
+export type ActiveContentKind = 'markdown_image' | 'html_active_tag' | 'html_event_handler' | 'dangerous_uri' | 'css_url';
 
 export interface ActiveContentMatch {
   kind: ActiveContentKind;
@@ -25,7 +20,7 @@ const ACTIVE_TAG =
   /<\s*\/?\s*(img|image|iframe|frame|frameset|script|object|embed|link|meta|form|svg|video|audio|source|style|base|input|picture|track|applet|portal)\b[^>]*>/gi;
 const EVENT_HANDLER_TAG = /<\s*[a-z][a-z0-9-]*\b[^>]*\son[a-z]+\s*=[^>]*>/gi;
 /** Labels allow one level of nested brackets, as CommonMark does (`![[x]](url)`). */
-const INLINE_IMAGE = /!\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(\s*<?([^)\s>]*)>?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g;
+const INLINE_IMAGE = /!\[((?:[^[\]]|\[[^[\]]*\])*)\]\(\s*<?([^)\s>]*)>?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g;
 const REFERENCE_IMAGE = /!\[([^\]]*)\]\[([^\]]*)\]/g;
 /**
  * Conservative image detector. CommonMark allows nested brackets in alt text
@@ -33,15 +28,16 @@ const REFERENCE_IMAGE = /!\[([^\]]*)\]\[([^\]]*)\]/g;
  * so any `![...]` counts. Benign prose almost never contains `![`.
  */
 const ANY_IMAGE = /!\[(?:[^\n]|\n(?![ \t]*\n)){0,2000}?\]/g;
-const DANGEROUS_ATTR = /\b(?:href|src|action|formaction|xlink:href|data|poster|background)\s*=\s*["']?\s*(?:javascript|vbscript|data|file)\s*:/gi;
+const DANGEROUS_ATTR =
+  /\b(?:href|src|action|formaction|xlink:href|data|poster|background)\s*=\s*["']?\s*(?:javascript|vbscript|data|file)\s*:/gi;
 const CSS_URL = /\bstyle\s*=\s*["'][^"']*\burl\s*\(/gi;
 
 /** `[text](url "title")`, not preceded by `!`. */
-const MARKDOWN_LINK = /(?<!!)\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\(\s*<?([^)\s>]+)>?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g;
+const MARKDOWN_LINK = /(?<!!)\[((?:[^[\]]|\[[^[\]]*\])*)\]\(\s*<?([^)\s>]+)>?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g;
 /** `[ref]: url` definitions, used by reference-style links and images. */
 const REFERENCE_DEF = /^[ \t]{0,3}\[([^\]]+)\]:[ \t]*<?(\S+?)>?(?:[ \t]+.*)?$/gm;
 const AUTOLINK = /<((?:https?|ftp|javascript|data|vbscript|file):[^>\s]+)>/gi;
-const BARE_URL = /\bhttps?:\/\/[^\s<>()"'`\]\[]+/gi;
+const BARE_URL = /\bhttps?:\/\/[^\s<>()"'`\][]+/gi;
 
 const DANGEROUS_SCHEME = /^\s*(javascript|vbscript|data|file)\s*:/i;
 
@@ -120,7 +116,9 @@ function stripOnce(text: string): string {
   t = t.replace(EVENT_HANDLER_TAG, '[active content removed]');
   t = t.replace(INLINE_IMAGE, (_m, alt: string) => imageMarker(alt));
   t = t.replace(REFERENCE_IMAGE, (_m, alt: string) => imageMarker(alt));
-  t = t.replace(MARKDOWN_LINK, (m, label: string, url: string) => (DANGEROUS_SCHEME.test(safeDecode(url)) ? `${label} [unsafe link removed]` : m));
+  t = t.replace(MARKDOWN_LINK, (m, label: string, url: string) =>
+    DANGEROUS_SCHEME.test(safeDecode(url)) ? `${label} [unsafe link removed]` : m,
+  );
   t = t.replace(AUTOLINK, (m, url: string) => (DANGEROUS_SCHEME.test(url) ? '[unsafe link removed]' : m));
   t = t.replace(CSS_URL, '[active content removed]');
   return t;
@@ -185,7 +183,10 @@ export function defangLinks(text: string, allowHosts: readonly string[]): Defang
 }
 
 function imageMarker(alt: string): string {
-  const clean = alt.replace(/[[\]()<>!]/g, '').replace(/\s+/g, ' ').trim();
+  const clean = alt
+    .replace(/[[\]()<>!]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return clean ? `[image removed: ${clean}]` : '[image removed]';
 }
 

@@ -59,7 +59,17 @@ describe('urls', () => {
 });
 
 describe('dlp', () => {
-  const all = ['ssn', 'credit_card', 'aws_access_key', 'private_key', 'github_token', 'slack_token', 'jwt', 'email_address', 'iban'] as const;
+  const all = [
+    'ssn',
+    'credit_card',
+    'aws_access_key',
+    'private_key',
+    'github_token',
+    'slack_token',
+    'jwt',
+    'email_address',
+    'iban',
+  ] as const;
   it('validates card numbers with Luhn', () => {
     expect(luhn('4111111111111111')).toBe(true);
     expect(luhn('4111111111111112')).toBe(false);
@@ -75,7 +85,11 @@ describe('dlp', () => {
   });
   it('detects tokens and keys', () => {
     const text = `AKIAIOSFODNN7EXAMPLE ghp_${'a'.repeat(36)} xoxb-1234567890-abc -----BEGIN OPENSSH PRIVATE KEY-----`;
-    expect(scanSensitive(text, all).map((m) => m.detector).sort()).toEqual(['aws_access_key', 'github_token', 'private_key', 'slack_token']);
+    expect(
+      scanSensitive(text, all)
+        .map((m) => m.detector)
+        .sort(),
+    ).toEqual(['aws_access_key', 'github_token', 'private_key', 'slack_token']);
   });
   it('validates IBAN checksums', () => {
     expect(scanSensitive('GB82 WEST 1234 5698 7654 32', all).map((m) => m.detector)).toContain('iban');

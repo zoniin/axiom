@@ -1,5 +1,5 @@
 import { parse as parseYaml } from 'yaml';
-import { Axiom, parsePolicy, stableBoundary, type Decision, type EvaluateRequest, type EvaluateResult } from '../src/core.js';
+import { Axiom, type Decision, type EvaluateRequest, type EvaluateResult, parsePolicy, stableBoundary } from '../src/core.js';
 import { POLICY_YAML, SCENARIOS } from './data.gen.js';
 
 type Tab = 'request' | 'policy';
@@ -82,12 +82,14 @@ function evaluate(): void {
   try {
     axiom = getAxiom();
   } catch (e) {
-    return showError(`Policy: ${message(e)}`);
+    showError(`Policy: ${message(e)}`);
+    return;
   }
   try {
     request = JSON.parse(state.request) as EvaluateRequest;
   } catch (e) {
-    return showError(`Request JSON: ${message(e)}`);
+    showError(`Request JSON: ${message(e)}`);
+    return;
   }
   try {
     const t0 = performance.now();
@@ -108,7 +110,9 @@ function showError(text: string): void {
 
 function message(e: unknown): string {
   if (e && typeof e === 'object' && 'issues' in e && Array.isArray((e as { issues: unknown[] }).issues)) {
-    return (e as { issues: Array<{ path: unknown[]; message: string }> }).issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`).join('\n');
+    return (e as { issues: Array<{ path: unknown[]; message: string }> }).issues
+      .map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`)
+      .join('\n');
   }
   return e instanceof Error ? e.message : String(e);
 }
@@ -122,7 +126,7 @@ function render(request: EvaluateRequest, r: EvaluateResult, ms: number): void {
   badge.className = `badge lg b-${r.decision}`;
   badge.textContent = r.decision;
   const rank = DECISIONS.indexOf(r.decision);
-  $('lattice').querySelectorAll('span').forEach((s, i) => s.classList.toggle('on', i <= rank));
+  for (const [i, s] of $('lattice').querySelectorAll('span').entries()) s.classList.toggle('on', i <= rank);
   $('verdict-meta').innerHTML =
     `<strong>${r.findings.length}</strong> finding${r.findings.length === 1 ? '' : 's'} · ` +
     `<strong>${r.rulesEvaluated.length}</strong> rules · evaluated in <strong>${ms < 1 ? `${(ms * 1000).toFixed(0)} µs` : `${ms.toFixed(2)} ms`}</strong>`;
@@ -174,7 +178,9 @@ function render(request: EvaluateRequest, r: EvaluateResult, ms: number): void {
   $('actions-panel').hidden = r.actions.length === 0;
   $('actions').innerHTML = r.actions
     .map(
-      (a) => `<tr><td class="k">${a.kind}</td><td class="t">${esc(a.target)}<div class="rules-small">${a.ruleIds.join(' · ') || 'no findings'}</div></td>
+      (
+        a,
+      ) => `<tr><td class="k">${a.kind}</td><td class="t">${esc(a.target)}<div class="rules-small">${a.ruleIds.join(' · ') || 'no findings'}</div></td>
         <td class="d"><span class="badge b-${a.decision}">${a.decision}</span></td></tr>`,
     )
     .join('');
@@ -183,7 +189,10 @@ function render(request: EvaluateRequest, r: EvaluateResult, ms: number): void {
 }
 
 function highlightMarkers(html: string): string {
-  return html.replace(/\[(REDACTED:[a-z_]+|image removed[^\]]*|active content removed|unsafe link removed)\]/g, '<span class="mark">[$1]</span>');
+  return html.replace(
+    /\[(REDACTED:[a-z_]+|image removed[^\]]*|active content removed|unsafe link removed)\]/g,
+    '<span class="mark">[$1]</span>',
+  );
 }
 
 function esc(s: string): string {
@@ -214,7 +223,10 @@ async function streamDemo(): Promise<void> {
 
   // Deterministic pseudo-random token sizes, like a real model stream.
   let seed = 7;
-  const next = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff), 1 + (seed % 5));
+  const next = () => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return 1 + (seed % 5);
+  };
   let buffer = '';
   let released = '';
   for (let i = 0; i < output.length; ) {
@@ -235,7 +247,8 @@ async function streamDemo(): Promise<void> {
   }
   const end = guard.end();
   released += end.text;
-  safe.innerHTML = highlightMarkers(esc(released)) + (end.halted ? `<span class="halt">\n■ stream halted: ${esc(end.reason ?? '')}</span>` : '');
+  safe.innerHTML =
+    highlightMarkers(esc(released)) + (end.halted ? `<span class="halt">\n■ stream halted: ${esc(end.reason ?? '')}</span>` : '');
   $('safe-label').textContent = end.halted ? 'Streamed (halted)' : 'Streamed (identical to the non-streamed result)';
   $('stream').textContent = '↻ Replay';
 }

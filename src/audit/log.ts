@@ -70,13 +70,35 @@ export interface ChainVerification {
   error?: string;
 }
 
-export function verifyChain(events: readonly AuditEvent[]): ChainVerification {
+/**
+ * Verifies a hash chain. By default the log must start at the genesis event
+ * (seq 0), so dropping the oldest events is detected too. To verify a later
+ * segment (e.g. after rotation), pass the last trusted event as `anchor`.
+ * Truncating the newest events can only be detected against an external copy
+ * of the latest hash, so publish it somewhere the log writer can't change.
+ */
+export function verifyChain(events: readonly AuditEvent[], options: { anchor?: { seq: number; hash: string } } = {}): ChainVerification {
+  const first = events[0];
+  if (first) {
+    const expectedSeq = options.anchor ? options.anchor.seq + 1 : 0;
+    const expectedPrev = options.anchor ? options.anchor.hash : GENESIS_HASH;
+    if (first.seq !== expectedSeq || first.prevHash !== expectedPrev) {
+      return {
+        ok: false,
+        count: events.length,
+        brokenAt: 0,
+        error: 'chain does not start at the expected anchor (events removed from the start)',
+      };
+    }
+  }
   let prev: string | undefined;
   for (let i = 0; i < events.length; i++) {
     const e = events[i]!;
     if (!e.hash || !e.prevHash) return { ok: false, count: events.length, brokenAt: i, error: 'event is not chained' };
     if (hashEvent(e) !== e.hash) return { ok: false, count: events.length, brokenAt: i, error: 'hash mismatch (event modified)' };
-    if (prev !== undefined && e.prevHash !== prev) return { ok: false, count: events.length, brokenAt: i, error: 'prevHash mismatch (event removed or reordered)' };
+    if (prev !== undefined && e.prevHash !== prev) {
+      return { ok: false, count: events.length, brokenAt: i, error: 'prevHash mismatch (event removed or reordered)' };
+    }
     if (i > 0 && e.seq !== (events[i - 1]!.seq ?? -2) + 1) return { ok: false, count: events.length, brokenAt: i, error: 'sequence gap' };
     prev = e.hash;
   }

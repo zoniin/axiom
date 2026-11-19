@@ -13,7 +13,8 @@ const HELP = `axiom: deterministic runtime security for LLM apps
 Usage:
   axiom check <request.json> [--policy file]   Evaluate one request, print findings
   axiom serve [--policy file] [--port 8787] [--audit audit.jsonl]
-  axiom harness [--report REPORT.md] [--json]  Run the red-team scenario corpus
+  axiom harness [--report REPORT.md] [--json] [--policy file] [--scenarios dir]
+                                               Run a scenario corpus (default: the built-in red-team corpus)
   axiom audit verify <audit.jsonl>             Verify a hash-chained audit log
   axiom rules                                  List built-in rules
 `;
@@ -31,6 +32,7 @@ async function main(argv: string[]): Promise<number> {
       port: { type: 'string' },
       audit: { type: 'string' },
       report: { type: 'string' },
+      scenarios: { type: 'string' },
       json: { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
     },
@@ -62,8 +64,11 @@ async function main(argv: string[]): Promise<number> {
       return new Promise(() => {});
     }
     case 'harness': {
-      const { runHarness, renderReport } = await import('./harness.js');
-      const summary = runHarness();
+      const { runHarness, renderReport, loadScenarios } = await import('./harness.js');
+      const summary = runHarness({
+        ...(values.policy ? { policyFile: values.policy } : {}),
+        ...(values.scenarios ? { scenarios: loadScenarios(values.scenarios) } : {}),
+      });
       if (values.report) {
         const { writeFileSync } = await import('node:fs');
         writeFileSync(values.report, renderReport(summary));
@@ -95,7 +100,9 @@ async function main(argv: string[]): Promise<number> {
 function printResult(r: EvaluateResult): void {
   console.log(`decision: ${color(r.decision, r.decision.toUpperCase())}  (${r.rulesEvaluated.length} rules evaluated)`);
   for (const f of r.findings) {
-    console.log(`  ${f.ruleId}  ${color(f.action, f.action.padEnd(8))}  ${f.target.padEnd(16)}  ${f.message}${f.evidence ? `  [${f.evidence}]` : ''}`);
+    console.log(
+      `  ${f.ruleId}  ${color(f.action, f.action.padEnd(8))}  ${f.target.padEnd(16)}  ${f.message}${f.evidence ? `  [${f.evidence}]` : ''}`,
+    );
   }
   if (r.context.dropped.length) console.log(`dropped context: ${r.context.dropped.map((d) => d.id).join(', ')}`);
   if (r.output?.modified) console.log(`\nsanitized output:\n  ${r.output.sanitized}`);

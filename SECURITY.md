@@ -24,3 +24,5 @@ A change that breaks any of these is a security bug:
 - Locked rules can't be weakened by policy.
 - A rule error never produces `allow`.
 - Audit events contain no raw request text or unmasked sensitive values.
+- In an `AgentSession`, untrusted tool output keeps tainting later actions until it is explicitly declassified.
+- A guarded tool whose call is not allowed never executes.

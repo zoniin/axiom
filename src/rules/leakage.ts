@@ -1,9 +1,9 @@
-import { maskValue, scanSensitive, type DlpMatch } from '../text/dlp.js';
+import { type DlpMatch, maskValue, scanSensitive } from '../text/dlp.js';
 import { findLinks } from '../text/markdown.js';
 import { normalizeForMatching } from '../text/normalize.js';
 import { urlDataSurfaces } from '../text/urls.js';
-import { actionSurfaces } from './surfaces.js';
 import type { Rule, RuleHit } from './rule.js';
+import { actionSurfaces } from './surfaces.js';
 
 export const canaryLeak: Rule = {
   id: 'AX-OUT-003',
@@ -24,7 +24,8 @@ export const canaryLeak: Rule = {
       hits.push({ target: 'output', message: 'Output contains a system-prompt canary token.' });
     }
     (ctx.request.actions ?? []).forEach((a, i) => {
-      if (leaked(actionSurfaces(a))) hits.push({ target: `action:${i}`, message: 'Action arguments contain a system-prompt canary token.' });
+      if (leaked(actionSurfaces(a)))
+        hits.push({ target: `action:${i}`, message: 'Action arguments contain a system-prompt canary token.' });
     });
     return hits;
   },

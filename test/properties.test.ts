@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { DLP_DETECTORS, sanitizeOutput, parsePolicy } from '../src/index.js';
+import { DLP_DETECTORS, parsePolicy, sanitizeOutput } from '../src/index.js';
 import { scanSensitive } from '../src/text/dlp.js';
 import { findActiveContent } from '../src/text/markdown.js';
 import { normalizeForMatching } from '../src/text/normalize.js';
@@ -12,12 +12,50 @@ import { axiom, req } from './helpers.js';
  */
 
 const FRAGMENTS = [
-  '![', '](', ')', '[', ']', '(', '<', '>', '"', "'", ' ', '\n', '!', ':', '=',
-  'https://evil.io/c?d=', 'http://x.io', 'javascript:', 'data:text/html,', 'JaVaScRiPt:', 'vbscript:',
-  '<img src=', '<IMG SRC=', '<svg', '<script>', '</script>', '<iframe', '<style>', 'onload=', 'onerror=',
-  ' style="background:url(', '[r]: https://e.io/x', '![a][r]', 'src=', 'href=',
-  '123-45-6789', '4111 1111 1111 1111', 'AKIAIOSFODNN7EXAMPLE', 'hello', 'refund', 'acme.com',
-  String.fromCodePoint(0x200b), String.fromCodePoint(0x202e), String.fromCodePoint(0xe0041),
+  '![',
+  '](',
+  ')',
+  '[',
+  ']',
+  '(',
+  '<',
+  '>',
+  '"',
+  "'",
+  ' ',
+  '\n',
+  '!',
+  ':',
+  '=',
+  'https://evil.io/c?d=',
+  'http://x.io',
+  'javascript:',
+  'data:text/html,',
+  'JaVaScRiPt:',
+  'vbscript:',
+  '<img src=',
+  '<IMG SRC=',
+  '<svg',
+  '<script>',
+  '</script>',
+  '<iframe',
+  '<style>',
+  'onload=',
+  'onerror=',
+  ' style="background:url(',
+  '[r]: https://e.io/x',
+  '![a][r]',
+  'src=',
+  'href=',
+  '123-45-6789',
+  '4111 1111 1111 1111',
+  'AKIAIOSFODNN7EXAMPLE',
+  'hello',
+  'refund',
+  'acme.com',
+  String.fromCodePoint(0x200b),
+  String.fromCodePoint(0x202e),
+  String.fromCodePoint(0xe0041),
 ];
 const adversarial = fc.array(fc.constantFrom(...FRAGMENTS), { maxLength: 40 }).map((p) => p.join(''));
 const anyText = fc.oneof(adversarial, fc.string({ maxLength: 200 }), fc.string({ unit: 'grapheme', maxLength: 80 }));
@@ -104,7 +142,10 @@ describe('invariants (fuzzed)', () => {
     );
     fc.assert(
       fc.property(anyText, action, (content, a) => {
-        const r = ax.evaluate(req({ context: [{ id: 'u', tenantId: 't1', trust: 'untrusted', sensitivity: 'public', content }], actions: [a] }), { audit: false });
+        const r = ax.evaluate(
+          req({ context: [{ id: 'u', tenantId: 't1', trust: 'untrusted', sensitivity: 'public', content }], actions: [a] }),
+          { audit: false },
+        );
         expect(r.actions[0]!.decision).not.toBe('allow');
       }),
       { numRuns: 1000 },
@@ -115,7 +156,10 @@ describe('invariants (fuzzed)', () => {
     const ax = axiom({ sinks: { http: { allow: [{ host: 'a.com' }] } } });
     fc.assert(
       fc.property(adversarial, adversarial, (input, output) => {
-        const r = ax.evaluate(req({ input, output, actions: [{ kind: 'http', target: `https://a.com/?q=${encodeURIComponent(output)}` }] }), { audit: false });
+        const r = ax.evaluate(
+          req({ input, output, actions: [{ kind: 'http', target: `https://a.com/?q=${encodeURIComponent(output)}` }] }),
+          { audit: false },
+        );
         const detectors = DLP_DETECTORS.filter((d) => d !== 'email_address');
         // Hex digests can contain Luhn-valid digit runs by chance; they are hashes, not data.
         const { requestDigest: _d, policy: _p, ...rest } = r.audit;

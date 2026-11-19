@@ -1,5 +1,5 @@
-import type { ProposedAction } from '../types.js';
 import { urlDataSurfaces } from '../text/urls.js';
+import type { ProposedAction } from '../types.js';
 
 /** Every string in an action that could carry data out: target, decoded URL parts, payload leaves. */
 export function actionSurfaces(action: ProposedAction): string[] {

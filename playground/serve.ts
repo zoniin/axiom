@@ -4,7 +4,12 @@ import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
 const root = join('playground', 'dist');
-const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const types: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+};
 const port = Number(process.env.PORT ?? 5173);
 
 createServer((req, res) => {

@@ -1,13 +1,14 @@
-import { sha256Hex } from './crypto/sha256.js';
 import { AUDIT_SCHEMA, type AuditEvent } from './audit/event.js';
 import type { AuditLog } from './audit/log.js';
+import { sha256Hex } from './crypto/sha256.js';
 import { reduceDecisions, stricter } from './decision.js';
 import type { Detector } from './detectors/detector.js';
 import { runDetectors } from './detectors/detector.js';
-import { canonicalJson, DLP_DETECTORS, parsePolicy, policyHash, type Policy, type PolicyInput } from './policy.js';
+import { canonicalJson, DLP_DETECTORS, type Policy, type PolicyInput, parsePolicy, policyHash } from './policy.js';
 import { AUTHORIZATION_RULES, CONTENT_RULES, SYSTEM_RULES } from './rules/index.js';
 import type { Rule, RuleContext } from './rules/rule.js';
 import { EvaluateRequestSchema } from './schema.js';
+import { AgentSession } from './session.js';
 import { StreamGuard } from './stream.js';
 import { redactSensitive } from './text/dlp.js';
 import { defangLinks, findActiveContent, neutralize, stripActiveContent } from './text/markdown.js';
@@ -69,6 +70,11 @@ export class Axiom {
    */
   evaluate(request: EvaluateRequest, options: { audit?: boolean } = {}): EvaluateResult {
     return this.finish(request, this.runRules(request), [], options.audit !== false);
+  }
+
+  /** Starts a stateful agent session whose taint persists across turns. See `AgentSession`. */
+  session(base: Omit<EvaluateRequest, 'context' | 'output' | 'actions'>): AgentSession {
+    return new AgentSession(this, base);
   }
 
   /** Guards streamed output. See `StreamGuard`. */
@@ -220,12 +226,23 @@ export class Axiom {
       requestDigest: sha256Hex(canonicalJson(raw)),
       rulesEvaluated,
       findings: findings.map((f) => {
-        const out: AuditEvent['findings'][number] = { ruleId: f.ruleId, action: f.action, severity: f.severity, target: f.target, message: f.message };
+        const out: AuditEvent['findings'][number] = {
+          ruleId: f.ruleId,
+          action: f.action,
+          severity: f.severity,
+          target: f.target,
+          message: f.message,
+        };
         if (f.evidence !== undefined) out.evidence = f.evidence;
         return out;
       }),
       context: { authorized: authorized.map((c) => c.id), dropped: dropped.map((d) => d.id), tainted },
-      actions: actions.map((a) => ({ index: a.index, kind: a.kind, destination: destinationLabel(a.kind, a.target), decision: a.decision })),
+      actions: actions.map((a) => ({
+        index: a.index,
+        kind: a.kind,
+        destination: destinationLabel(a.kind, a.target),
+        decision: a.decision,
+      })),
     };
     if (request.sessionId !== undefined) event.sessionId = request.sessionId;
     if (request.principal.userId !== undefined) event.userId = request.principal.userId;
@@ -304,7 +321,11 @@ function destinationLabel(kind: string, target: string): string {
       return '(invalid url)';
     }
   }
-  if (kind === 'email') return target.split(/[,;]/).map((r) => r.trim().split('@')[1] ?? '?').join(',');
+  if (kind === 'email')
+    return target
+      .split(/[,;]/)
+      .map((r) => r.trim().split('@')[1] ?? '?')
+      .join(',');
   return target;
 }
 

@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { evaluateSink, parsePolicy } from '../src/index.js';
 import { axiom, cp, req, ruleIds, tagEncode } from './helpers.js';
 
-const untrusted = (content: string, extra = {}) => ({ id: 'u1', tenantId: 't1', trust: 'untrusted' as const, sensitivity: 'internal' as const, content, ...extra });
+const untrusted = (content: string, extra = {}) => ({
+  id: 'u1',
+  tenantId: 't1',
+  trust: 'untrusted' as const,
+  sensitivity: 'internal' as const,
+  content,
+  ...extra,
+});
 
 describe('AX-INP-001 instruction override', () => {
   it.each([
@@ -40,7 +47,9 @@ describe('AX-INP-002 hidden unicode', () => {
 
 describe('AX-CTX-001/002 retrieval authorization', () => {
   it('drops cross-tenant chunks and blocks', () => {
-    const r = axiom().evaluate(req({ context: [{ id: 'x', tenantId: 'other', trust: 'internal', sensitivity: 'internal', content: 'secret' }] }));
+    const r = axiom().evaluate(
+      req({ context: [{ id: 'x', tenantId: 'other', trust: 'internal', sensitivity: 'internal', content: 'secret' }] }),
+    );
     expect(r.decision).toBe('block');
     expect(r.context.dropped.map((d) => d.id)).toEqual(['x']);
     expect(r.context.authorized).toEqual([]);
@@ -135,7 +144,9 @@ describe('AX-OUT-002 links', () => {
 describe('AX-OUT-003 canary', () => {
   it('blocks and redacts leaked canaries in output and actions', () => {
     const ax = axiom({ canaries: ['CANARY-1234abcd'], sinks: { tools: { allow: ['note'] } } });
-    const r = ax.evaluate(req({ output: 'prompt: CANARY-1234abcd', actions: [{ kind: 'tool', target: 'note', payload: { t: 'CANARY-1234abcd' } }] }));
+    const r = ax.evaluate(
+      req({ output: 'prompt: CANARY-1234abcd', actions: [{ kind: 'tool', target: 'note', payload: { t: 'CANARY-1234abcd' } }] }),
+    );
     expect(r.decision).toBe('block');
     expect(r.findings.filter((f) => f.ruleId === 'AX-OUT-003').map((f) => f.target)).toEqual(['output', 'action:0']);
     expect(r.output?.sanitized).not.toContain('CANARY');
@@ -151,10 +162,14 @@ describe('AX-OUT-004 commitments', () => {
     expect(axiom().evaluate(req({ output: 'You are pre-approved for a loan' })).decision).toBe('allow');
   });
   it('escalates with the finance pack', () => {
-    expect(axiom({ commitments: { packs: ['finance'] } }).evaluate(req({ output: 'You are pre-approved for a loan' })).decision).toBe('escalate');
+    expect(axiom({ commitments: { packs: ['finance'] } }).evaluate(req({ output: 'You are pre-approved for a loan' })).decision).toBe(
+      'escalate',
+    );
   });
   it('supports custom patterns', () => {
-    expect(axiom({ commitments: { patterns: ['free forever'] } }).evaluate(req({ output: 'It is FREE FOREVER' })).decision).toBe('escalate');
+    expect(axiom({ commitments: { patterns: ['free forever'] } }).evaluate(req({ output: 'It is FREE FOREVER' })).decision).toBe(
+      'escalate',
+    );
   });
 });
 
@@ -181,7 +196,9 @@ describe('AX-DLP-001/002', () => {
     expect(axiom({ dlp: { output: 'block' } }).evaluate(req({ output: '123-45-6789' })).decision).toBe('block');
   });
   it('blocks percent-encoded data in action URLs', () => {
-    const r = axiom({ sinks: { http: { allow: [{ host: 'a.com' }] } } }).evaluate(req({ actions: [{ kind: 'http', target: 'https://a.com/?s=123%2D45%2D6789' }] }));
+    const r = axiom({ sinks: { http: { allow: [{ host: 'a.com' }] } } }).evaluate(
+      req({ actions: [{ kind: 'http', target: 'https://a.com/?s=123%2D45%2D6789' }] }),
+    );
     expect(ruleIds(r)).toEqual(['AX-DLP-002']);
   });
 });
@@ -238,16 +255,22 @@ describe('AX-ACT-002/003 taint flow', () => {
     expect(r.decision).toBe('block');
   });
   it('declassification removes taint', () => {
-    const r = axiom(policy).evaluate(req({ context: [untrusted('hello', { declassifiedBy: 'rev' })], actions: [{ kind: 'tool', target: 'lookup' }] }));
+    const r = axiom(policy).evaluate(
+      req({ context: [untrusted('hello', { declassifiedBy: 'rev' })], actions: [{ kind: 'tool', target: 'lookup' }] }),
+    );
     expect(r.decision).toBe('allow');
   });
   it('blocks destinations that came from untrusted content, even if approved', () => {
-    const r = axiom(policy).evaluate(req({ context: [untrusted('contact billing@acme.com')], actions: [{ kind: 'email', target: 'billing@acme.com' }] }));
+    const r = axiom(policy).evaluate(
+      req({ context: [untrusted('contact billing@acme.com')], actions: [{ kind: 'email', target: 'billing@acme.com' }] }),
+    );
     expect(ruleIds(r)).toContain('AX-ACT-003');
     expect(r.decision).toBe('block');
   });
   it('does not match destinations as substrings of longer names', () => {
-    const r = axiom(policy).evaluate(req({ context: [untrusted('see xbilling@acme.com.au')], actions: [{ kind: 'email', target: 'billing@acme.com' }] }));
+    const r = axiom(policy).evaluate(
+      req({ context: [untrusted('see xbilling@acme.com.au')], actions: [{ kind: 'email', target: 'billing@acme.com' }] }),
+    );
     expect(ruleIds(r)).not.toContain('AX-ACT-003');
   });
 });

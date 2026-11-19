@@ -122,9 +122,9 @@ table.actions td.d { text-align: right; white-space: nowrap; }
 
 details summary { cursor: pointer; color: var(--muted); font-size: 13px; padding: 12px 16px; list-style: none; }
 details summary::-webkit-details-marker { display: none; }
+.audit-json { margin: 0 16px 16px; padding: 12px; background: var(--code-bg); border-radius: 8px; overflow: auto; max-height: 360px; font-size: 12px; }
 details summary::before { content: "▸ "; }
 details[open] summary::before { content: "▾ "; }
-details pre { margin: 0 16px 16px; padding: 12px; background: var(--code-bg); border-radius: 8px; overflow: auto; max-height: 360px; font-size: 12px; }
 .foot { color: var(--faint); font-size: 12.5px; text-align: center; padding: 0 24px 32px; }
 </style>
 </head>
@@ -152,8 +152,8 @@ details pre { margin: 0 16px 16px; padding: 12px; background: var(--code-bg); bo
     <div class="panel">
       <div class="panel-h">
         <div class="tabs" role="tablist">
-          <button class="tab" role="tab" id="tab-request" aria-selected="true">Request</button>
-          <button class="tab" role="tab" id="tab-policy" aria-selected="false">Policy</button>
+          <button class="tab" type="button" role="tab" id="tab-request" aria-selected="true">Request</button>
+          <button class="tab" type="button" role="tab" id="tab-policy" aria-selected="false">Policy</button>
         </div>
         <div class="right"><span class="rules-small" id="format-hint">JSON</span></div>
       </div>
@@ -200,7 +200,7 @@ details pre { margin: 0 16px 16px; padding: 12px; background: var(--code-bg); bo
     </div>
 
     <div class="panel">
-      <details><summary>Audit event</summary><pre id="audit"></pre></details>
+      <details><summary>Audit event</summary><pre class="audit-json" id="audit"></pre></details>
     </div>
   </section>
 </main>

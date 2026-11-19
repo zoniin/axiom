@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { AuditLog, MemoryAuditSink, guardStream, stableBoundary } from '../src/index.js';
-import { runHarness, loadScenarios } from '../src/harness.js';
+import { loadScenarios, runHarness } from '../src/harness.js';
+import { AuditLog, guardStream, MemoryAuditSink, stableBoundary } from '../src/index.js';
 import { findActiveContent } from '../src/text/markdown.js';
 import { axiom, req } from './helpers.js';
 
@@ -133,8 +133,12 @@ describe('streaming properties (fuzzed)', () => {
   });
 
   it('benign harness outputs stream without halting for any chunking', () => {
-    const benign = runHarness().results.filter((r) => r.kind === 'benign').map((r) => r.id);
-    const texts = loadScenarios().filter((s) => benign.includes(s.id) && s.request.output).map((s) => s.request.output!);
+    const benign = runHarness()
+      .results.filter((r) => r.kind === 'benign')
+      .map((r) => r.id);
+    const texts = loadScenarios()
+      .filter((s) => benign.includes(s.id) && s.request.output)
+      .map((s) => s.request.output!);
     fc.assert(
       fc.property(fc.constantFrom(...texts), fc.array(fc.nat(), { maxLength: 12 }), (output, cuts) => {
         expect(runStream(ax, chunk(output, cuts)).end.halted).toBe(false);

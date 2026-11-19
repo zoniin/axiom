@@ -6,9 +6,9 @@ import { accessAuthorization, indirectInjection, tenantIsolation } from './retri
 import type { Rule } from './rule.js';
 import { sinkDefaultDeny, taintedAction, untrustedDestination } from './sinks.js';
 
+export { COMMITMENT_PACKS } from './commitments.js';
 export type { Rule, RuleContext, RuleHit } from './rule.js';
 export { evaluateSink } from './sinks.js';
-export { COMMITMENT_PACKS } from './commitments.js';
 
 /** Context-authorization rules run first; their drops define what every later rule sees. */
 export const AUTHORIZATION_RULES: readonly Rule[] = [tenantIsolation, accessAuthorization];

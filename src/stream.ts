@@ -65,7 +65,8 @@ export class StreamGuard {
     if (blocking.length > 0) {
       return { text: '', halted: true, reason: `${blocking.map((f) => f.ruleId).join(', ')} on streamed output`, result };
     }
-    if (!sanitized.startsWith(this.emitted)) return { text: '', halted: true, reason: 'sanitized stream diverged from released text', result };
+    if (!sanitized.startsWith(this.emitted))
+      return { text: '', halted: true, reason: 'sanitized stream diverged from released text', result };
     const text = sanitized.slice(this.emitted.length);
     this.emitted = sanitized;
     return { text, halted: false, result };

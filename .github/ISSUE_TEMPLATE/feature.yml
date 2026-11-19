@@ -1,0 +1,15 @@
+name: Feature request
+description: A new rule, integration or capability.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Threat or problem
+      description: What attack or integration need does this address? Which invariant in SECURITY.md does it relate to?
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Rule behavior, default action, and whether it should be locked. Deterministic rules only on the hot path.

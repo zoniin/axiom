@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   test:
+    name: test (node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -22,10 +23,24 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run playground:build
+      - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
+      - run: npm run coverage
       - run: npm run build
       - name: Red-team harness
         run: node dist/cli.js harness --report harness/REPORT.md
-      - name: Schemas are up to date
+      - name: Generated files are up to date
         run: npx tsx scripts/emit-schemas.ts && git diff --exit-code schemas/ harness/REPORT.md
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t axiom .
+      - name: Smoke test the container
+        run: |
+          docker run -d --name axiom -p 8787:8787 axiom
+          for i in $(seq 1 20); do curl -fs localhost:8787/health && break; sleep 1; done
+          curl -fs -X POST localhost:8787/v1/evaluate -H 'content-type: application/json' \
+            -d '{"tenantId":"t","output":"![](https://evil.example/c?d=1)"}' | grep -q '"decision":"block"'
+          docker logs axiom

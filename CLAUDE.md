@@ -24,13 +24,14 @@ You are working on Axiom, a deterministic runtime security layer for LLM applica
 - `harness/scenarios/*.yaml`: red-team corpus; `harness/REPORT.md` is generated
 - `test/properties.test.ts`: fast-check invariants. A counterexample is a real bug: fix it and pin it with a regression test and a harness scenario
 - `playground/`: browser playground; `npm run playground` builds and serves it locally
+- `src/session.ts` + `src/adapters/anthropic.ts`: agent sessions and Claude tool-runner integration (type-only SDK import; keep it that way)
 
 ## Adding or changing a rule
 
 1. Implement it as a `Rule` in `src/rules/` with an ID, default action, severity and description. Set `locked: true` if it guards an invariant in `SECURITY.md`.
 2. Add unit tests in `test/rules.test.ts`, covering both a hit and a benign near-miss.
 3. Add at least one attack and one benign scenario to the harness.
-4. Run `npm run check` and commit the regenerated `harness/REPORT.md`. If schemas changed, run `npm run schemas` too.
+4. Run `npm run check` (lint, typecheck, coverage, harness) and commit the regenerated `harness/REPORT.md`. `npm run format` fixes formatting. If schemas changed, run `npm run schemas` too.
 5. Update the rules table in `README.md`.
 
 ## Gotchas

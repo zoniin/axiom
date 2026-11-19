@@ -75,6 +75,28 @@ breaks the injection → action chain:
 A reviewer can declassify a chunk (`declassifiedBy`) after vetting it, which
 removes its taint. The reviewer's ID is carried into the context.
 
+## Agent sessions
+
+`Axiom.evaluate` is stateless: taint exists only if the caller passes the
+untrusted context back in. Agents make that easy to get wrong. A tool result
+from three turns ago is no longer in the request, but it may still be steering
+the model.
+
+`axiom.session(base)` returns an `AgentSession` that accumulates every
+authorized chunk: retrieved context via `addContext`, and tool output via
+`recordToolResult`, which is untrusted by default. Every `checkAction` and
+`checkOutput` call evaluates against the full accumulated context, so taint
+lasts until a reviewer calls `declassify(chunkId, reviewer)`. Each check is
+a normal audited evaluation, and `session.history` keeps the action verdicts.
+
+`axiom-guard/anthropic` builds on this for the Claude SDK. `guardTool(session, tool)`
+returns the same runnable tool with a wrapped `run` that works like this:
+
+1. maps the input to a `ProposedAction` (default `tool`, or `http`/`email` via `toAction`)
+2. runs `session.checkAction`, and on `escalate` calls the optional `approve` callback
+3. if the call isn't allowed, returns a "declined by policy" result without executing
+4. otherwise executes it, records the output as untrusted, and returns it spotlighted
+
 ## Spotlighting
 
 Authorized chunks come back with a `rendered` field:

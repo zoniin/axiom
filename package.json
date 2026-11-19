@@ -1,6 +1,6 @@
 {
   "name": "axiom-guard",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Deterministic, provenance-aware runtime security gateway for LLM applications: prompt injection, exfiltration, and sink control.",
   "license": "MIT",
   "type": "module",
@@ -14,6 +14,10 @@
     "./core": {
       "types": "./dist/core.d.ts",
       "import": "./dist/core.js"
+    },
+    "./anthropic": {
+      "types": "./dist/adapters/anthropic.d.ts",
+      "import": "./dist/adapters/anthropic.js"
     }
   },
   "bin": {
@@ -23,7 +27,6 @@
     "dist",
     "policies",
     "schemas",
-    "harness/policy.yaml",
     "harness/scenarios"
   ],
   "engines": {
@@ -37,10 +40,14 @@
     "serve": "tsx src/cli.ts serve",
     "example": "tsx examples/rag-pipeline.ts",
     "schemas": "tsx scripts/emit-schemas.ts",
-    "check": "npm run playground:build && npm run typecheck && npm test && npm run harness",
+    "check": "npm run playground:build && npm run lint && npm run typecheck && npm run coverage && npm run harness",
     "bench": "tsx scripts/bench.ts",
     "playground:build": "tsx playground/build.ts",
-    "playground": "tsx playground/build.ts && tsx playground/serve.ts"
+    "playground": "tsx playground/build.ts && tsx playground/serve.ts",
+    "example:agent": "tsx examples/claude-agent.ts",
+    "coverage": "vitest run --coverage",
+    "lint": "biome check .",
+    "format": "biome check --write ."
   },
   "keywords": [
     "llm",
@@ -58,7 +65,10 @@
     "zod": "^4.1.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^1.10.0",
+    "@biomejs/biome": "^2.6.8",
     "@types/node": "^22.10.5",
+    "@vitest/coverage-v8": "^5.1.1",
     "esbuild": "^0.28.2",
     "fast-check": "^4.10.3",
     "tsx": "^4.20.0",
@@ -69,5 +79,13 @@
     "type": "git",
     "url": "git+https://github.com/zoniin/axiom.git"
   },
-  "homepage": "https://zoniin.github.io/axiom/"
+  "homepage": "https://zoniin.github.io/axiom/",
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
+  }
 }

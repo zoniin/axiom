@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a bypass or vulnerability (private)
+    url: https://github.com/zoniin/axiom/security/advisories/new
+    about: Bypasses of a locked rule, exfiltration paths and tenant-isolation flaws are reported privately, not as issues.
+  - name: Try it in the playground
+    url: https://zoniin.github.io/axiom/
+    about: Reproduce a request against the real engine in your browser first.

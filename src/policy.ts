@@ -78,7 +78,9 @@ export const PolicySchema = z.object({
 
   dlp: z
     .object({
-      detectors: z.array(z.enum(DLP_DETECTORS)).default(['ssn', 'credit_card', 'aws_access_key', 'private_key', 'github_token', 'slack_token', 'jwt']),
+      detectors: z
+        .array(z.enum(DLP_DETECTORS))
+        .default(['ssn', 'credit_card', 'aws_access_key', 'private_key', 'github_token', 'slack_token', 'jwt']),
       /** Sensitive data in model output: redact (`sanitize`) or `block`. */
       output: z.enum(['sanitize', 'block']).default('sanitize'),
     })

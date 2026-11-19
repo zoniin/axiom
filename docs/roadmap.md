@@ -1,6 +1,6 @@
 # Roadmap
 
-## Done (v0.3)
+## Done (v0.4)
 
 - Deterministic engine with a decision lattice, locked rules and fail-closed errors
 - Retrieval authorization (tenant, role, clearance) before anything else runs
@@ -15,6 +15,8 @@
 - Streaming output guard with prefix-stability checking
 - Property-based fuzzing of the security invariants
 - Runtime-agnostic core and a browser playground on GitHub Pages
+- Agent sessions with persistent taint, and Claude tool-runner integration (`guardTool`)
+- Custom harness runs (`--policy`, `--scenarios`), coverage gates, Docker smoke test
 
 ## Next
 

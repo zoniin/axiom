@@ -30,7 +30,7 @@ export const accessAuthorization: Rule = {
   defaultAction: 'sanitize',
   locked: true,
   description:
-    "Drops chunks the principal may not read (role or clearance mismatch) before they reach the model. The rest of the request proceeds.",
+    'Drops chunks the principal may not read (role or clearance mismatch) before they reach the model. The rest of the request proceeds.',
   evaluate(ctx) {
     const { principal } = ctx.request;
     const hits: RuleHit[] = [];
@@ -39,7 +39,11 @@ export const accessAuthorization: Rule = {
       if (c.allowedRoles && c.allowedRoles.length > 0 && !c.allowedRoles.some((r) => principal.roles.includes(r))) {
         hits.push({ target: `context:${c.id}`, drop: true, message: `Principal lacks any of roles [${c.allowedRoles.join(', ')}].` });
       } else if (sensitivityRank(c.sensitivity) > sensitivityRank(principal.clearance)) {
-        hits.push({ target: `context:${c.id}`, drop: true, message: `Chunk is ${c.sensitivity}; principal clearance is ${principal.clearance}.` });
+        hits.push({
+          target: `context:${c.id}`,
+          drop: true,
+          message: `Chunk is ${c.sensitivity}; principal clearance is ${principal.clearance}.`,
+        });
       }
     }
     return hits;

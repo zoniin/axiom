@@ -37,9 +37,15 @@ export const DIRECT_PATTERNS: InjectionPattern[] = [
       'i',
     ),
   },
-  { id: 'mode_switch', re: /\b(enter|enable|activate|switch to|turn on)\b (developer|god|admin|debug|dan|jailbreak|sudo|maintenance) mode\b/i },
+  {
+    id: 'mode_switch',
+    re: /\b(enter|enable|activate|switch to|turn on)\b (developer|god|admin|debug|dan|jailbreak|sudo|maintenance) mode\b/i,
+  },
   { id: 'dan', re: /\bdo anything now\b|\bDAN\b(?= (mode|prompt|jailbreak))/i },
-  { id: 'fake_chat_delimiter', re: /<\|\s*(im_start|im_end|system|endoftext|start_header_id)\s*\|>|\[\/?(system|inst)\]|<\/?(system|sys)>/i },
+  {
+    id: 'fake_chat_delimiter',
+    re: /<\|\s*(im_start|im_end|system|endoftext|start_header_id)\s*\|>|\[\/?(system|inst)\]|<\/?(system|sys)>/i,
+  },
   { id: 'fake_system_header', re: /(^|\s)(#{2,3}|-{3,}|={3,}) ?(system|admin|developer)( message| prompt| override)?\s*:/i },
   { id: 'new_instructions', re: /\b(new|updated|revised|real|actual|true) (system )?instructions\s*:/i },
   {
@@ -50,10 +56,19 @@ export const DIRECT_PATTERNS: InjectionPattern[] = [
 
 /** Signals that third-party content is trying to address the model. Applied to untrusted context only. */
 export const INDIRECT_PATTERNS: InjectionPattern[] = [
-  { id: 'addresses_ai', re: /\b(attention|note|important|message|instructions?) (to|for) (the |any )?(ai|assistant|llm|language model|model|agent|chatbot|copilot)\b/i },
+  {
+    id: 'addresses_ai',
+    re: /\b(attention|note|important|message|instructions?) (to|for) (the |any )?(ai|assistant|llm|language model|model|agent|chatbot|copilot)\b/i,
+  },
   { id: 'if_you_are_ai', re: /\bif you are an? (ai|llm|large language model|language model|assistant|agent|bot)\b/i },
-  { id: 'ai_reading_this', re: /\b(ai|assistant|agent|model|llm)s? (that is |who is )?(reading|processing|summari[sz]ing|parsing|analy[sz]ing) this\b/i },
-  { id: 'conceal_from_user', re: /\b(do not|don'?t|never) (tell|inform|mention (this )?to|reveal (this )?to|alert|notify|let) the user\b|\bwithout (telling|alerting|notifying|informing) the user\b/i },
+  {
+    id: 'ai_reading_this',
+    re: /\b(ai|assistant|agent|model|llm)s? (that is |who is )?(reading|processing|summari[sz]ing|parsing|analy[sz]ing) this\b/i,
+  },
+  {
+    id: 'conceal_from_user',
+    re: /\b(do not|don'?t|never) (tell|inform|mention (this )?to|reveal (this )?to|alert|notify|let) the user\b|\bwithout (telling|alerting|notifying|informing) the user\b/i,
+  },
   {
     id: 'exfil_directive',
     re: new RegExp(
@@ -63,7 +78,10 @@ export const INDIRECT_PATTERNS: InjectionPattern[] = [
   },
   {
     id: 'render_directive',
-    re: new RegExp(String.raw`\b(include|render|add|insert|append|embed|output)\b${W}{0,40}\b(image|markdown|pixel|img tag)\b${W}{0,80}https?:\/\/`, 'i'),
+    re: new RegExp(
+      String.raw`\b(include|render|add|insert|append|embed|output)\b${W}{0,40}\b(image|markdown|pixel|img tag)\b${W}{0,80}https?:\/\/`,
+      'i',
+    ),
   },
   { id: 'assistant_impersonation', re: /(^|\s)(assistant|system)\s*:\s*(sure|ok|okay|understood|i will)\b/i },
 ];

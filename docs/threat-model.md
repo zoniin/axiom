@@ -39,7 +39,8 @@
 | Unicode obfuscation and ASCII smuggling | Normalization + `AX-INP-002` | | `06-obfuscation.yaml` |
 | Secret or identifier leakage | `AX-DLP-001`, `AX-DLP-002` | | `07-leakage.yaml` |
 | Unauthorized commitments in regulated domains | `AX-OUT-004` | Human review | `08-commitments.yaml` |
-| Tampering with the audit trail | Hash chain + `axiom audit verify` | | `test/engine.test.ts` |
+| Injection persisting across agent turns | `AgentSession` taint | `guardTool` pre-execution check | `test/agent.test.ts` |
+| Tampering with the audit trail | Hash chain anchored at genesis + `axiom audit verify` | | `test/engine.test.ts`, `test/audit-cli.test.ts` |
 
 ## Non-goals and known gaps
 
@@ -65,6 +66,10 @@ These are listed so nobody mistakes Axiom for something it isn't. The
 - **Fine-grained taint.** Taint covers the whole turn, not individual
   values. That's conservative, and it means approval prompts fire on any
   action in a tainted turn.
+- **Audit tail truncation.** A hash chain detects edits, reordering and
+  removal from the start or middle. Deleting the newest events is only
+  detectable against an external copy of the latest hash. Ship it somewhere
+  the gateway can't write.
 - **Upstream identity.** Axiom trusts `tenantId`, `principal` and chunk
   metadata from the caller. Those must come from your authenticated session
   and your index, never from the model.

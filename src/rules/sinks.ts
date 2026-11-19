@@ -1,6 +1,6 @@
 import type { Policy } from '../policy.js';
-import type { Decision, ProposedAction } from '../types.js';
 import { checkUrl, hostMatches, hostMatchesAny } from '../text/urls.js';
+import type { Decision, ProposedAction } from '../types.js';
 import type { Rule, RuleHit } from './rule.js';
 
 interface SinkVerdict {
@@ -24,7 +24,10 @@ export function evaluateSink(action: ProposedAction, policy: Policy): SinkVerdic
       return { action: 'none', reason: 'Approved destination.' };
     }
     case 'email': {
-      const recipients = action.target.split(/[,;]/).map((r) => r.trim()).filter(Boolean);
+      const recipients = action.target
+        .split(/[,;]/)
+        .map((r) => r.trim())
+        .filter(Boolean);
       if (recipients.length === 0) return { action: 'block', reason: 'No recipient.' };
       for (const r of recipients) {
         const m = /^[^@\s<>]+@([a-z0-9.-]+\.[a-z]{2,})$/i.exec(r);
@@ -37,7 +40,8 @@ export function evaluateSink(action: ProposedAction, policy: Policy): SinkVerdic
     }
     case 'tool': {
       if (policy.sinks.tools.allow.includes(action.target)) return { action: 'none', reason: 'Approved tool.' };
-      if (policy.sinks.tools.escalate.includes(action.target)) return { action: 'escalate', reason: `Tool ${action.target} requires approval.` };
+      if (policy.sinks.tools.escalate.includes(action.target))
+        return { action: 'escalate', reason: `Tool ${action.target} requires approval.` };
       return { action: 'block', reason: `Tool ${action.target} is not registered in policy.` };
     }
     case 'memory':
@@ -130,7 +134,11 @@ function destinationNeedles(a: ProposedAction): string[] {
       return [];
     }
   }
-  if (a.kind === 'email') return a.target.split(/[,;]/).map((r) => r.trim().toLowerCase()).filter(Boolean);
+  if (a.kind === 'email')
+    return a.target
+      .split(/[,;]/)
+      .map((r) => r.trim().toLowerCase())
+      .filter(Boolean);
   return [];
 }
 

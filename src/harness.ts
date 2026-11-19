@@ -15,7 +15,7 @@ import type { Decision, EvaluateRequest } from './types.js';
  * 100% secure and 0% useful.
  */
 
-const Decision = z.enum(['allow', 'sanitize', 'escalate', 'block']);
+const DecisionSchema = z.enum(['allow', 'sanitize', 'escalate', 'block']);
 
 const ScenarioSchema = z.object({
   id: z.string(),
@@ -26,7 +26,7 @@ const ScenarioSchema = z.object({
   reference: z.string().optional(),
   request: EvaluateRequestSchema,
   expect: z.object({
-    decision: Decision,
+    decision: DecisionSchema,
     rules: z.array(z.string()).default([]),
     notRules: z.array(z.string()).default([]),
     dropped: z.array(z.string()).default([]),
@@ -64,9 +64,13 @@ export interface HarnessSummary {
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const HARNESS_DIR = resolve(HERE, '..', 'harness');
+/** The corpus is written against this policy: a fictional lending-support assistant. */
+export const HARNESS_POLICY = resolve(HERE, '..', 'policies', 'fintech-support.yaml');
 
 export function loadScenarios(dir = join(HARNESS_DIR, 'scenarios')): Scenario[] {
-  const files = readdirSync(dir).filter((f) => f.endsWith('.yaml')).sort();
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith('.yaml'))
+    .sort();
   const all: Scenario[] = [];
   for (const f of files) {
     const parsed = FileSchema.safeParse(parseYaml(readFileSync(join(dir, f), 'utf8')));
@@ -82,7 +86,7 @@ export function loadScenarios(dir = join(HARNESS_DIR, 'scenarios')): Scenario[] 
 }
 
 export function runHarness(options: { scenarios?: Scenario[]; policyFile?: string } = {}): HarnessSummary {
-  const policy = loadPolicyFile(options.policyFile ?? join(HARNESS_DIR, 'policy.yaml'));
+  const policy = loadPolicyFile(options.policyFile ?? HARNESS_POLICY);
   const axiom = new Axiom({ policy, clock: () => new Date(0), idGenerator: () => 'harness' });
   const scenarios = options.scenarios ?? loadScenarios();
 
@@ -136,8 +140,12 @@ export function renderReport(s: HarnessSummary, opts: { color?: boolean } = {}):
   lines.push('# Axiom harness report', '');
   lines.push(`Policy \`${s.policy}\` (\`${s.policyHash.slice(0, 12)}\`), ${s.total} scenarios.`, '');
   lines.push('| Metric | Value |', '|---|---|');
-  lines.push(`| Attack scenarios contained (not allowed) | ${s.attack.contained}/${s.attack.total} (${pct(s.attack.contained, s.attack.total)}) |`);
-  lines.push(`| Benign scenarios passed through (allow or sanitize) | ${s.benign.passedThrough}/${s.benign.total} (${pct(s.benign.passedThrough, s.benign.total)}) |`);
+  lines.push(
+    `| Attack scenarios contained (not allowed) | ${s.attack.contained}/${s.attack.total} (${pct(s.attack.contained, s.attack.total)}) |`,
+  );
+  lines.push(
+    `| Benign scenarios passed through (allow or sanitize) | ${s.benign.passedThrough}/${s.benign.total} (${pct(s.benign.passedThrough, s.benign.total)}) |`,
+  );
   lines.push(`| Benign false positives (escalate or block) | ${s.benign.falsePositives} |`);
   lines.push(`| Documented known gaps | ${s.knownGaps} |`);
   lines.push(`| Scenarios matching expectations exactly | ${s.total - s.failed.length}/${s.total} |`, '');
@@ -158,7 +166,13 @@ export function renderReport(s: HarnessSummary, opts: { color?: boolean } = {}):
   }
   const gaps = s.results.filter((r) => r.kind === 'known_gap');
   if (gaps.length) {
-    lines.push('', '## Known gaps', '', 'Attacks the deterministic rules are not expected to catch. They are kept in the corpus so regressions and improvements are visible.', '');
+    lines.push(
+      '',
+      '## Known gaps',
+      '',
+      'Attacks the deterministic rules are not expected to catch. They are kept in the corpus so regressions and improvements are visible.',
+      '',
+    );
     for (const g of gaps) lines.push(`- \`${g.id}\`: ${g.description}`);
   }
   if (s.failed.length) {
