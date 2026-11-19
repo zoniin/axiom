@@ -40,7 +40,7 @@
 | Secret or identifier leakage | `AX-DLP-001`, `AX-DLP-002` | | `07-leakage.yaml` |
 | Unauthorized commitments in regulated domains | `AX-OUT-004` | Human review | `08-commitments.yaml` |
 | Injection persisting across agent turns | `AgentSession` taint | `guardTool` pre-execution check | `test/agent.test.ts` |
-| Tampering with the audit trail | Hash chain anchored at genesis + `axiom audit verify` | | `test/engine.test.ts`, `test/audit-cli.test.ts` |
+| Tampering with the audit trail | Hash chain anchored at genesis + `axiom-guard audit verify` | | `test/engine.test.ts`, `test/audit-cli.test.ts` |
 
 ## Non-goals and known gaps
 

@@ -142,7 +142,7 @@ evaluated, findings with scrubbed evidence, authorized and dropped chunk IDs,
 action destinations (host or tool name only), the policy name and hash, and a
 SHA-256 digest of the request. When an `AuditLog` is configured, events are
 written synchronously before `evaluate` returns, and each one commits to the
-previous event's hash. `axiom audit verify` detects edits, deletions and
+previous event's hash. `axiom-guard audit verify` detects edits, deletions and
 reordering. A gateway restarted with `--audit` resumes the chain, and it
 refuses to append to a corrupted log.
 

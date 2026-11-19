@@ -1,6 +1,6 @@
 # Security policy
 
-Axiom is security tooling, so a bypass is a vulnerability.
+Axiom Guard is security tooling, so a bypass is a vulnerability.
 
 ## Reporting
 

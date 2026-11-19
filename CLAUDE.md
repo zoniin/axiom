@@ -1,6 +1,6 @@
-# Claude Code Instructions for Axiom
+# Claude Code Instructions for Axiom Guard
 
-You are working on Axiom, a deterministic runtime security layer for LLM applications.
+You are working on Axiom Guard, a deterministic runtime security layer for LLM applications.
 
 ## Non-negotiable engineering rules
 

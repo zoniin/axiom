@@ -29,6 +29,9 @@ jobs:
       - run: npm run build
       - name: Red-team harness
         run: node dist/cli.js harness --report harness/REPORT.md
+      - name: Installed-package smoke test
+        if: matrix.node == 22
+        run: npm run pack:test
       - name: Generated files are up to date
         run: npx tsx scripts/emit-schemas.ts && git diff --exit-code schemas/ harness/REPORT.md
 

@@ -36,4 +36,5 @@ await build({
   logLevel: 'warning',
 });
 copyFileSync(join('playground', 'index.html'), join(out, 'index.html'));
+copyFileSync(join('docs', 'social-preview.png'), join(out, 'og.png'));
 console.log(`playground built: ${out} (${scenarios.length} scenarios)`);

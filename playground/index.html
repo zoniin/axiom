@@ -3,8 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Axiom Playground</title>
-<meta name="description" content="Run the Axiom LLM security engine in your browser: prompt injection, exfiltration and sink control, evaluated deterministically client-side.">
+<title>Axiom Guard Playground</title>
+<meta name="description" content="Run the Axiom Guard LLM security engine in your browser: prompt injection, exfiltration and sink control, evaluated deterministically client-side.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Axiom Guard: stop prompt injection by controlling where data can go">
+<meta property="og:description" content="Live playground: watch a Claude agent read a poisoned web page and see every tool call checked by the real engine, in your browser.">
+<meta property="og:url" content="https://zoniin.github.io/axiom/">
+<meta property="og:image" content="https://zoniin.github.io/axiom/og.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zoniin.github.io/axiom/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z' fill='%234f7cff'/%3E%3Cpath d='m11 16 3.5 3.5L21 13' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root {
@@ -34,6 +43,8 @@
   --code-bg: #10141b; --shadow: none; color-scheme: dark;
 }
 * { box-sizing: border-box; }
+/* biome-ignore lint/complexity/noImportantStyles: the hidden attribute must beat component display rules (main is display: grid). */
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 body { background: var(--bg); color: var(--text); font: 14px/1.5 var(--sans); -webkit-font-smoothing: antialiased; }
 a { color: var(--accent); text-decoration: none; }
@@ -125,6 +136,46 @@ details summary::-webkit-details-marker { display: none; }
 .audit-json { margin: 0 16px 16px; padding: 12px; background: var(--code-bg); border-radius: 8px; overflow: auto; max-height: 360px; font-size: 12px; }
 details summary::before { content: "▸ "; }
 details[open] summary::before { content: "▾ "; }
+.modes { display: flex; gap: 2px; padding: 3px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; }
+.mode { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; padding: 5px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+.mode[aria-selected="true"] { background: var(--panel); color: var(--text); box-shadow: var(--shadow); font-weight: 600; }
+.hbtn.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.hbtn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, black); }
+#agent-view { max-width: 980px; margin: 0 auto; padding: 24px 24px 40px; }
+.agent-intro { display: flex; gap: 24px; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.agent-intro h1 { font-size: 22px; letter-spacing: -0.02em; margin: 0 0 6px; }
+.agent-intro p { margin: 0; color: var(--muted); max-width: 640px; }
+.agent-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.auto { font-size: 12.5px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+.timeline { list-style: none; margin: 0; padding: 0 0 0 22px; border-left: 2px solid var(--border); display: grid; gap: 14px; }
+.step { position: relative; animation: rise .35s ease-out both; }
+.step::before { content: ""; position: absolute; left: -29px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--panel); border: 2px solid var(--faint); }
+.step.s-allow::before { border-color: var(--allow); background: var(--allow); }
+.step.s-sanitize::before { border-color: var(--sanitize); background: var(--sanitize); }
+.step.s-escalate::before { border-color: var(--escalate); background: var(--escalate); }
+.step.s-block::before { border-color: var(--block); background: var(--block); }
+.step .panel { padding: 12px 14px; }
+.step-h { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.who { font-size: 12px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.call { font-family: var(--mono); font-size: 13px; }
+.step-h .badge { margin-left: auto; }
+.step p { margin: 8px 0 0; }
+.step pre { margin: 8px 0 0; padding: 10px; background: var(--code-bg); border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.why { margin-top: 8px; display: grid; gap: 4px; font-size: 13px; }
+.why span { font-family: var(--mono); font-size: 12px; font-weight: 600; margin-right: 6px; }
+.muted { color: var(--muted); }
+.approval { display: flex; gap: 8px; align-items: center; margin-top: 10px; padding: 10px; border: 1px dashed var(--escalate); border-radius: 8px; background: var(--escalate-bg); font-size: 13px; }
+.approval .hbtn { margin-left: auto; }
+.tally { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; animation: rise .35s ease-out both; }
+.tally .panel { padding: 14px 16px; }
+.tally .panel + .panel { margin-top: 0; }
+.tally h3 { margin: 0 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.tally ul { margin: 0; padding-left: 18px; }
+.tally .bad li::marker { color: var(--block); }
+.tally .good li::marker { color: var(--allow); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (max-width: 720px) { .agent-intro { flex-direction: column; } .agent-controls { align-items: flex-start; } .tally { grid-template-columns: 1fr; } #agent-view { padding: 16px; } .modes { order: 3; width: 100%; } header { flex-wrap: wrap; } }
+@media (prefers-reduced-motion: reduce) { .step, .tally { animation: none; } }
 .foot { color: var(--faint); font-size: 12.5px; text-align: center; padding: 0 24px 32px; }
 </style>
 </head>
@@ -132,9 +183,12 @@ details[open] summary::before { content: "▾ "; }
 <header>
   <div class="brand">
     <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z" fill="var(--accent)"/><path d="m11 16 3.5 3.5L21 13" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Axiom <span class="sub" style="color:var(--faint);font-weight:500">playground</span>
+    Axiom Guard <span class="sub" style="color:var(--faint);font-weight:500">playground</span>
   </div>
-  <span class="tagline">The real engine, running in your browser. Nothing leaves this page.</span>
+  <div class="modes" role="tablist" aria-label="Mode">
+    <button class="mode" type="button" role="tab" id="mode-agent" aria-selected="false">Agent replay</button>
+    <button class="mode" type="button" role="tab" id="mode-play" aria-selected="true">Playground</button>
+  </div>
   <span class="spacer"></span>
   <button class="hbtn" id="theme" type="button" aria-label="Toggle color theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg><span class="lbl">Theme</span></button>
   <a class="hbtn" href="https://github.com/zoniin/axiom" aria-label="GitHub repository"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.19-3.08-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.08 0 4.41-2.7 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></svg><span class="lbl">GitHub</span></a>
@@ -204,6 +258,20 @@ details[open] summary::before { content: "▾ "; }
     </div>
   </section>
 </main>
+<section id="agent-view" hidden>
+  <div class="agent-intro">
+    <div>
+      <h1>A Claude agent reads a poisoned web page.</h1>
+      <p>The page tells the agent to email the conversation to an outside address and plant a tracking pixel. Watch every tool call go through <code>guardTool()</code> and an <code>AgentSession</code>. The model's moves are scripted; every verdict below comes from the real engine running in this tab.</p>
+    </div>
+    <div class="agent-controls">
+      <button class="hbtn primary" id="agent-play" type="button">▶ Play</button>
+      <label class="auto"><input type="checkbox" id="agent-auto"> auto-approve</label>
+    </div>
+  </div>
+  <ol class="timeline" id="timeline"></ol>
+  <div class="tally" id="tally" hidden></div>
+</section>
 <p class="foot">Axiom is deterministic: the same request and policy always produce the same verdict. <a href="https://github.com/zoniin/axiom#rules">Rule reference</a></p>
 <script type="module" src="./app.js"></script>
 </body>

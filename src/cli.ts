@@ -8,15 +8,15 @@ import type { Policy } from './policy.js';
 import { loadPolicyFile } from './policy-file.js';
 import type { EvaluateResult } from './types.js';
 
-const HELP = `axiom: deterministic runtime security for LLM apps
+const HELP = `axiom-guard: deterministic runtime security for LLM apps and agents
 
 Usage:
-  axiom check <request.json> [--policy file]   Evaluate one request, print findings
-  axiom serve [--policy file] [--port 8787] [--audit audit.jsonl]
-  axiom harness [--report REPORT.md] [--json] [--policy file] [--scenarios dir]
+  axiom-guard check <request.json> [--policy file]   Evaluate one request, print findings
+  axiom-guard serve [--policy file] [--port 8787] [--audit audit.jsonl]
+  axiom-guard harness [--report REPORT.md] [--json] [--policy file] [--scenarios dir]
                                                Run a scenario corpus (default: the built-in red-team corpus)
-  axiom audit verify <audit.jsonl>             Verify a hash-chained audit log
-  axiom rules                                  List built-in rules
+  axiom-guard audit verify <audit.jsonl>             Verify a hash-chained audit log
+  axiom-guard rules                                  List built-in rules
 `;
 
 const COLORS = { allow: '\x1b[32m', sanitize: '\x1b[36m', escalate: '\x1b[33m', block: '\x1b[31m' } as const;
@@ -60,7 +60,7 @@ async function main(argv: string[]): Promise<number> {
       const axiom = new Axiom({ policy, audit });
       const port = Number(values.port ?? process.env.PORT ?? 8787);
       serve({ fetch: createApp(axiom).fetch, port });
-      console.log(`axiom gateway listening on :${port} (policy "${axiom.policy.name}" ${axiom.policyHash.slice(0, 12)})`);
+      console.log(`axiom-guard listening on :${port} (policy "${axiom.policy.name}" ${axiom.policyHash.slice(0, 12)})`);
       return new Promise(() => {});
     }
     case 'harness': {
@@ -78,7 +78,7 @@ async function main(argv: string[]): Promise<number> {
       return summary.failed.length > 0 ? 1 : 0;
     }
     case 'audit': {
-      if (rest[0] !== 'verify' || !rest[1]) throw new Error('usage: axiom audit verify <file>');
+      if (rest[0] !== 'verify' || !rest[1]) throw new Error('usage: axiom-guard audit verify <file>');
       const events = new JsonlAuditSink(rest[1]).readAll();
       const v = verifyChain(events);
       console.log(v.ok ? `OK: ${v.count} events, chain intact` : `BROKEN at event ${v.brokenAt}: ${v.error}`);
@@ -111,7 +111,7 @@ function printResult(r: EvaluateResult): void {
 main(process.argv.slice(2)).then(
   (code) => process.exit(code),
   (err: unknown) => {
-    console.error(`axiom: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`axiom-guard: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
   },
 );

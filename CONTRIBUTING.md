@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. Axiom is security tooling, so changes are held to a few
+Thanks for helping. Axiom Guard is security tooling, so changes are held to a few
 extra rules. They're short.
 
 ## Setup

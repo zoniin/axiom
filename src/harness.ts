@@ -137,7 +137,7 @@ const pct = (n: number, d: number) => (d === 0 ? 'n/a' : `${((100 * n) / d).toFi
 export function renderReport(s: HarnessSummary, opts: { color?: boolean } = {}): string {
   const mark = (ok: boolean) => (opts.color ? (ok ? '\x1b[32mPASS\x1b[0m' : '\x1b[31mFAIL\x1b[0m') : ok ? 'PASS' : 'FAIL');
   const lines: string[] = [];
-  lines.push('# Axiom harness report', '');
+  lines.push('# Axiom Guard harness report', '');
   lines.push(`Policy \`${s.policy}\` (\`${s.policyHash.slice(0, 12)}\`), ${s.total} scenarios.`, '');
   lines.push('| Metric | Value |', '|---|---|');
   lines.push(

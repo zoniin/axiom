@@ -1,4 +1,4 @@
-# Axiom harness report
+# Axiom Guard harness report
 
 Policy `acme-lending-assistant` (`27cb5d968e7e`), 72 scenarios.
 

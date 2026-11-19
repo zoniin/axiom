@@ -1,5 +1,6 @@
 import { parse as parseYaml } from 'yaml';
 import { Axiom, type Decision, type EvaluateRequest, type EvaluateResult, parsePolicy, stableBoundary } from '../src/core.js';
+import { initAgentReplay } from './agent.js';
 import { POLICY_YAML, SCENARIOS } from './data.gen.js';
 
 type Tab = 'request' | 'policy';
@@ -297,6 +298,33 @@ $('stream').addEventListener('click', () => {
   } else void streamDemo();
 });
 
+// ---------- modes ----------
+
+const replay = initAgentReplay({
+  timeline: $('timeline'),
+  tally: $('tally'),
+  play: $<HTMLButtonElement>('agent-play'),
+  auto: $<HTMLInputElement>('agent-auto'),
+});
+
+function setMode(mode: 'agent' | 'play'): void {
+  $('mode-agent').setAttribute('aria-selected', String(mode === 'agent'));
+  $('mode-play').setAttribute('aria-selected', String(mode === 'play'));
+  $('agent-view').hidden = mode !== 'agent';
+  document.querySelector('main')!.hidden = mode !== 'play';
+  if (mode === 'agent') {
+    history.replaceState(null, '', '#agent');
+    if (!$('timeline').childElementCount) void replay.play();
+  } else {
+    history.replaceState(null, '', `#${select.value}`);
+  }
+}
+$('mode-agent').addEventListener('click', () => setMode('agent'));
+$('mode-play').addEventListener('click', () => setMode('play'));
+
 initTheme();
 populateScenarios();
-loadScenario(decodeURIComponent(location.hash.slice(1)) || DEFAULT_SCENARIO);
+const initial = decodeURIComponent(location.hash.slice(1));
+if (new URLSearchParams(location.search).has('auto')) $<HTMLInputElement>('agent-auto').checked = true;
+loadScenario(initial && initial !== 'agent' ? initial : DEFAULT_SCENARIO);
+if (initial === 'agent') setMode('agent');

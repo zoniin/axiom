@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- Source for docs/social-preview.png. Render with Playwright at a 1280x640 viewport and take a screenshot. -->
+<title>Axiom Guard social preview</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1280px;height:640px;background:#0c0f14;color:#e6e9ef;font:16px/1.4 -apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;display:flex;padding:72px 80px;gap:56px;position:relative;overflow:hidden}
+body::before{content:"";position:absolute;inset:0;background:radial-gradient(900px 500px at 85% 20%,rgba(124,155,255,.18),transparent 60%),radial-gradient(700px 400px at 0% 100%,rgba(60,207,138,.08),transparent 60%)}
+.l{position:relative;flex:1;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:16px;font-size:30px;font-weight:700;letter-spacing:-.01em}
+.brand svg{width:48px;height:48px}
+h1{font-size:58px;line-height:1.05;letter-spacing:-.03em;margin-top:40px;font-weight:750}
+h1 em{font-style:normal;color:#7c9bff}
+p{margin-top:24px;font-size:22px;color:#9aa4b5;max-width:560px}
+.foot{margin-top:auto;font:17px ui-monospace,SFMono-Regular,Menlo,monospace;color:#6c7686}
+.r{position:relative;width:440px;display:flex;flex-direction:column;gap:14px;justify-content:center}
+.c{background:#141922;border:1px solid #262e3b;border-radius:14px;padding:16px 18px}
+.h{display:flex;align-items:center;gap:10px;font:15px ui-monospace,SFMono-Regular,Menlo,monospace}
+.b{margin-left:auto;font:700 12.5px -apple-system,sans-serif;letter-spacing:.06em;padding:4px 10px;border-radius:99px;text-transform:uppercase}
+.allow{color:#3ccf8a;background:#0f2a1e}.block{color:#ff6b74;background:#331418}.esc{color:#f2b14c;background:#2e220c}.san{color:#55b3f5;background:#0e2333}
+.s{margin-top:6px;font-size:13.5px;color:#9aa4b5}
+</style></head><body>
+<div class="l">
+  <div class="brand"><svg viewBox="0 0 32 32" role="img" aria-label="Axiom Guard"><title>Axiom Guard</title><path d="M16 2 4 7v8c0 7.5 5.1 13.4 12 15 6.9-1.6 12-7.5 12-15V7z" fill="#7c9bff"/><path d="m11 16 3.5 3.5L21 13" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Axiom Guard</div>
+  <h1>Stop prompt injection<br>by controlling <em>where<br>data can go.</em></h1>
+  <p>Deterministic taint tracking, default-deny sinks and exfiltration blocking for LLM apps and Claude agents.</p>
+  <div class="foot">zoniin.github.io/axiom · live playground</div>
+</div>
+<div class="r">
+  <div class="c"><div class="h">fetch_page(rates.example)<span class="b allow">allow</span></div><div class="s">result tainted · injection detected</div></div>
+  <div class="c"><div class="h">send_email(records@…)<span class="b block">block</span></div><div class="s">destination came from untrusted page</div></div>
+  <div class="c"><div class="h">send_email(ops@acme.com)<span class="b esc">escalate</span></div><div class="s">context tainted · human approval</div></div>
+  <div class="c"><div class="h">answer: ![](…/px.gif)<span class="b san">sanitize</span></div><div class="s">tracking pixel stripped</div></div>
+</div>
+</body></html>

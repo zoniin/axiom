@@ -1,8 +1,30 @@
 {
   "name": "axiom-guard",
-  "version": "0.4.0",
-  "description": "Deterministic, provenance-aware runtime security gateway for LLM applications: prompt injection, exfiltration, and sink control.",
+  "version": "0.5.0",
+  "description": "Deterministic runtime security for LLM apps and Claude agents: taint tracking, default-deny sinks, exfiltration blocking, hash-chained audit.",
+  "keywords": [
+    "llm",
+    "ai-security",
+    "prompt-injection",
+    "agents",
+    "claude",
+    "anthropic",
+    "guardrails",
+    "taint-tracking",
+    "dlp",
+    "rag",
+    "exfiltration"
+  ],
+  "homepage": "https://zoniin.github.io/axiom/",
+  "bugs": {
+    "url": "https://github.com/zoniin/axiom/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoniin/axiom.git"
+  },
   "license": "MIT",
+  "author": "zoniin",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,7 +43,7 @@
     }
   },
   "bin": {
-    "axiom": "./dist/cli.js"
+    "axiom-guard": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -31,6 +53,10 @@
   ],
   "engines": {
     "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -47,22 +73,23 @@
     "example:agent": "tsx examples/claude-agent.ts",
     "coverage": "vitest run --coverage",
     "lint": "biome check .",
-    "format": "biome check --write ."
+    "format": "biome check --write .",
+    "prepare": "npm run build",
+    "pack:test": "node scripts/pack-test.mjs"
   },
-  "keywords": [
-    "llm",
-    "security",
-    "prompt-injection",
-    "ai-security",
-    "guardrails",
-    "dlp",
-    "rag"
-  ],
   "dependencies": {
     "@hono/node-server": "^2.1.9",
     "hono": "^4.9.0",
     "yaml": "^2.8.0",
     "zod": "^4.1.0"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^1.10.0",
@@ -74,18 +101,5 @@
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vitest": "^5.1.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/zoniin/axiom.git"
-  },
-  "homepage": "https://zoniin.github.io/axiom/",
-  "peerDependencies": {
-    "@anthropic-ai/sdk": ">=1.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@anthropic-ai/sdk": {
-      "optional": true
-    }
   }
 }

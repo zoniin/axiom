@@ -24,4 +24,4 @@ body:
     id: result
     attributes:
       label: What Axiom returned
-      description: Output of `axiom check request.json`, or a playground screenshot.
+      description: Output of `axiom-guard check request.json`, or a playground screenshot.

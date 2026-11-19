@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0
+
+### Added
+- Agent replay in the playground (`#agent`): a scripted Claude tool-use turn run through the real `AgentSession` and `guardTool`, with interactive approval. Recorded as `docs/agent-replay.gif`.
+- Open Graph and Twitter card metadata plus a social preview image for link unfurls.
+- Release workflow: tag `v*` runs the full checks, creates a GitHub release from this changelog, and publishes to npm with provenance when `NPM_TOKEN` is set.
+- Installed-package smoke test (`npm run pack:test`) in CI: installs the packed tarball into an empty project and exercises every entry point and the CLI.
+- Installable from GitHub today: `npm install github:zoniin/axiom` (builds via `prepare`).
+
+### Changed
+- Renamed to **Axiom Guard**. The CLI is now `axiom-guard` (was `axiom`, which collides with Axiom.co's CLI). Library API, rule IDs and audit format are unchanged.
+- Source maps embed their sources.
+
 ## 0.4.0
 
 ### Added

@@ -14,7 +14,7 @@ export function createApp(axiom: Axiom): Hono {
 
   app.use('/v1/*', bodyLimit({ maxSize: 2 * 1024 * 1024, onError: (c) => c.json({ error: 'payload_too_large' }, 413) }));
 
-  app.get('/health', (c) => c.json({ ok: true, service: 'axiom', policy: axiom.policy.name, policyHash: axiom.policyHash }));
+  app.get('/health', (c) => c.json({ ok: true, service: 'axiom-guard', policy: axiom.policy.name, policyHash: axiom.policyHash }));
 
   app.get('/v1/rules', (c) =>
     c.json(
@@ -42,7 +42,7 @@ export function createApp(axiom: Axiom): Hono {
       return c.json(result);
     } catch (err) {
       // Fail closed: an engine error is a block, never an allow.
-      console.error('axiom: evaluation failed', err);
+      console.error('axiom-guard: evaluation failed', err);
       return c.json({ decision: 'block', error: 'evaluation_failed' }, 500);
     }
   });
