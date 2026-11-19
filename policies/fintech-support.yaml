@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=../schemas/policy.schema.json
+# Policy used by the red-team harness: a fictional lending-support assistant
+# with retrieval, a webhook integration, internal email and three tools.
+version: 1
+name: acme-lending-assistant
+sinks:
+  http:
+    allow:
+      - host: hooks.acme-lending.com
+        methods: [POST]
+        pathPrefix: /v1/
+      - host: api.acme-lending.com
+  email:
+    allowDomains: [acme-lending.com]
+  tools:
+    allow: [search_policy_kb, get_application_status]
+    escalate: [update_application]
+  memory: escalate
+  export: deny
+rendering:
+  activeContent: block
+  linkAllowHosts: [acme-lending.com, "*.acme-lending.com", consumerfinance.gov]
+dlp:
+  detectors: [ssn, credit_card, aws_access_key, private_key, github_token, slack_token, jwt]
+  output: sanitize
+canaries: [AXIOM-CANARY-7f3a9c2e]
+commitments:
+  packs: [finance]

@@ -30,6 +30,23 @@ Use this file as a working research ledger. Priority clusters:
 - Microsoft prompt abuse detection playbook
 - OpenTelemetry GenAI semantic conventions
 
-## Product conclusion
+## Spotlighting and ASCII smuggling
 
-Axiom should not compete as a better regex filter or single prompt classifier. The credible wedge is a runtime gateway that owns provenance, retrieval authorization, sink control, and auditability, while using lightweight detectors as a fast signal layer.
+- Hines et al. (2024), "Defending Against Indirect Prompt Injection Attacks With Spotlighting"
+- Greshake et al. (2023), "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection"
+- Rehberger, markdown image exfiltration and Unicode tag "ASCII smuggling" write-ups (embracethered.com)
+
+## How Axiom uses this
+
+| Idea | Source | Where in Axiom |
+|---|---|---|
+| Privilege separation between data and control | CaMeL, Progent | Taint rules `AX-ACT-002`/`AX-ACT-003`, coarse-grained because a gateway can't see the plan |
+| Delimiting untrusted data | Spotlighting | `spotlight()` in `src/engine.ts` |
+| Deterministic sink policy | Progent, OWASP | `AX-ACT-001` |
+| Zero-click render exfiltration | Rehberger; vendor URL-exfil fixes | `AX-OUT-001`, `AX-OUT-002` |
+| Detectors as signals, not boundaries | Prompt Guard, PINT results | `Detector` interface |
+| Utility measured next to security | AgentDojo | Harness reports benign pass rate alongside attack containment |
+
+## Conclusion
+
+A better regex filter or a single prompt classifier isn't a defensible design. The useful layer is a runtime gateway that owns provenance, retrieval authorization, sink control and auditability, and uses lightweight detectors only as a fast signal.

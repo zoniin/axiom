@@ -1,0 +1,63 @@
+{
+  "name": "axiom-guard",
+  "version": "0.2.0",
+  "description": "Deterministic, provenance-aware runtime security gateway for LLM applications: prompt injection, exfiltration, and sink control.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "axiom": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "policies",
+    "schemas",
+    "harness/policy.yaml",
+    "harness/scenarios"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "harness": "tsx src/cli.ts harness --report harness/REPORT.md",
+    "serve": "tsx src/cli.ts serve",
+    "example": "tsx examples/rag-pipeline.ts",
+    "schemas": "tsx scripts/emit-schemas.ts",
+    "check": "npm run typecheck && npm test && npm run harness"
+  },
+  "keywords": [
+    "llm",
+    "security",
+    "prompt-injection",
+    "ai-security",
+    "guardrails",
+    "dlp",
+    "rag"
+  ],
+  "dependencies": {
+    "@hono/node-server": "^2.1.9",
+    "hono": "^4.9.0",
+    "yaml": "^2.8.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^5.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zoniin/axiom.git"
+  }
+}

@@ -5,23 +5,26 @@ on:
   push:
     branches: [main]
 
-jobs:
-  harness:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install -r harness/requirements.txt
-      - run: cd harness && python evaluator.py --scenarios scenarios.yaml
-      - run: cd harness && pytest
+permissions:
+  contents: read
 
-  runtime-gateway:
+jobs:
+  test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      - run: cd services/runtime-gateway && npm install && npm run build
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Red-team harness
+        run: node dist/cli.js harness --report harness/REPORT.md
+      - name: Schemas are up to date
+        run: npx tsx scripts/emit-schemas.ts && git diff --exit-code schemas/ harness/REPORT.md

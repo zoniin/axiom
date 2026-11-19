@@ -1,0 +1,47 @@
+scenarios:
+  - id: retrieval-cross-tenant
+    kind: attack
+    category: retrieval-authorization
+    description: Vector search returns another tenant's chunk. Dropped before the model and the request fails closed.
+    request:
+      tenantId: acme
+      principal: { userId: u1, roles: [support], clearance: confidential }
+      context:
+        - { id: own-1, tenantId: acme, trust: internal, content: "Acme refund policy." }
+        - { id: other-1, tenantId: globex, trust: internal, content: "Globex borrower list." }
+    expect: { decision: block, rules: [AX-CTX-001], dropped: [other-1] }
+
+  - id: retrieval-role-mismatch
+    kind: attack
+    category: retrieval-authorization
+    description: Support agent's query hits an underwriting-only document. Chunk is dropped, request continues.
+    request:
+      tenantId: acme
+      principal: { userId: u2, roles: [support], clearance: confidential }
+      context:
+        - { id: uw-1, tenantId: acme, trust: internal, allowedRoles: [underwriting], content: "Override thresholds..." }
+        - { id: faq-1, tenantId: acme, trust: internal, content: "Public FAQ text." }
+    expect: { decision: sanitize, rules: [AX-CTX-002], dropped: [uw-1] }
+
+  - id: retrieval-clearance-mismatch
+    kind: attack
+    category: retrieval-authorization
+    description: Restricted chunk for a principal with internal clearance.
+    request:
+      tenantId: acme
+      principal: { userId: u3, roles: [support], clearance: internal }
+      context:
+        - { id: restricted-1, tenantId: acme, trust: internal, sensitivity: restricted, content: "Model risk thresholds." }
+    expect: { decision: sanitize, rules: [AX-CTX-002], dropped: [restricted-1] }
+
+  - id: benign-authorized-retrieval
+    kind: benign
+    category: retrieval-authorization
+    description: Authorized chunks with matching role and clearance.
+    request:
+      tenantId: acme
+      principal: { userId: u4, roles: [underwriting], clearance: confidential }
+      context:
+        - { id: uw-2, tenantId: acme, trust: internal, sensitivity: confidential, allowedRoles: [underwriting], content: "DTI guidance." }
+      output: Debt-to-income guidance is in section 4 of the underwriting manual.
+    expect: { decision: allow }

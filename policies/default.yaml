@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../schemas/policy.schema.json
+#
+# Starter policy. Every omitted field falls back to the most restrictive
+# default, so an empty file is a valid policy that denies all side effects.
+version: 1
+name: default
+
+sinks:
+  http:
+    allow: []            # e.g. - { host: hooks.example.com, methods: [POST], pathPrefix: /v1/ }
+  email:
+    allowDomains: []     # e.g. [example.com]
+  tools:
+    allow: []            # read-only tools that may run freely
+    escalate: []         # tools that always need human approval
+  memory: escalate       # deny | escalate | allow  (always blocked when context is tainted)
+  export: deny
+
+rendering:
+  activeContent: block   # block | sanitize
+  linkAllowHosts: []     # e.g. [example.com, "*.example.com"]
+
+dlp:
+  detectors: [ssn, credit_card, aws_access_key, private_key, github_token, slack_token, jwt]
+  output: sanitize       # sanitize (redact) | block
+
+canaries: []             # strings planted in your system prompt, e.g. [AXIOM-CANARY-<random>]
+
+commitments:
+  packs: []              # finance | legal | healthcare
+  patterns: []
+
+overrides: {}            # e.g. { AX-INP-001: block }. Locked rules can only be made stricter.
+
+detectors:
+  enabled: []
+  timeoutMs: 250

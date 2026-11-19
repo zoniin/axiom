@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "default": 1,
+      "type": "number",
+      "const": 1
+    },
+    "name": {
+      "default": "default",
+      "type": "string"
+    },
+    "sinks": {
+      "type": "object",
+      "properties": {
+        "http": {
+          "type": "object",
+          "properties": {
+            "allow": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "methods": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "pathPrefix": {
+                    "type": "string",
+                    "format": "starts_with",
+                    "pattern": "^\\/.*"
+                  }
+                },
+                "required": [
+                  "host"
+                ]
+              }
+            }
+          }
+        },
+        "email": {
+          "type": "object",
+          "properties": {
+            "allowDomains": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "tools": {
+          "default": {
+            "allow": [],
+            "escalate": []
+          },
+          "type": "object",
+          "properties": {
+            "allow": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "escalate": {
+              "default": [],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "memory": {
+          "default": "escalate",
+          "type": "string",
+          "enum": [
+            "deny",
+            "escalate",
+            "allow"
+          ]
+        },
+        "export": {
+          "default": "deny",
+          "type": "string",
+          "enum": [
+            "deny",
+            "escalate",
+            "allow"
+          ]
+        }
+      }
+    },
+    "rendering": {
+      "type": "object",
+      "properties": {
+        "activeContent": {
+          "default": "block",
+          "type": "string",
+          "enum": [
+            "block",
+            "sanitize"
+          ]
+        },
+        "linkAllowHosts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "dlp": {
+      "default": {
+        "detectors": [
+          "ssn",
+          "credit_card",
+          "aws_access_key",
+          "private_key",
+          "github_token",
+          "slack_token",
+          "jwt"
+        ],
+        "output": "sanitize"
+      },
+      "type": "object",
+      "properties": {
+        "detectors": {
+          "default": [
+            "ssn",
+            "credit_card",
+            "aws_access_key",
+            "private_key",
+            "github_token",
+            "slack_token",
+            "jwt"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "ssn",
+              "credit_card",
+              "aws_access_key",
+              "private_key",
+              "github_token",
+              "slack_token",
+              "jwt",
+              "email_address",
+              "iban"
+            ]
+          }
+        },
+        "output": {
+          "default": "sanitize",
+          "type": "string",
+          "enum": [
+            "sanitize",
+            "block"
+          ]
+        }
+      }
+    },
+    "canaries": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 8
+      }
+    },
+    "commitments": {
+      "default": {
+        "packs": [],
+        "patterns": []
+      },
+      "type": "object",
+      "properties": {
+        "packs": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "finance",
+              "legal",
+              "healthcare"
+            ]
+          }
+        },
+        "patterns": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "overrides": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "enum": [
+          "allow",
+          "sanitize",
+          "escalate",
+          "block"
+        ]
+      }
+    },
+    "detectors": {
+      "default": {
+        "timeoutMs": 250,
+        "enabled": []
+      },
+      "type": "object",
+      "properties": {
+        "timeoutMs": {
+          "default": 250,
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 5000
+        },
+        "enabled": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

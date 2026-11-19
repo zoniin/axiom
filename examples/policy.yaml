@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=../schemas/policy.schema.json
+name: example-support-bot
+sinks:
+  tools:
+    allow: [create_ticket]
+rendering:
+  linkAllowHosts: [help.example.com]

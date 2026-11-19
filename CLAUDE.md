@@ -1,6 +1,6 @@
 # Claude Code Instructions for Axiom
 
-You are working on Axiom, a runtime security layer for AI applications.
+You are working on Axiom, a deterministic runtime security layer for LLM applications.
 
 ## Non-negotiable engineering rules
 
@@ -15,10 +15,27 @@ You are working on Axiom, a runtime security layer for AI applications.
 9. Prefer small, composable policy modules over large opaque scoring functions.
 10. Any high-risk branch must fail closed.
 
-## Implementation sequence
+## Layout
 
-Start with `services/runtime-gateway/src/policy.ts` and make the rules pass harness tests. Then add persistence, observability, and optional model adapters.
+- `src/engine.ts`: two-pass evaluation (authorization rules, then content rules), decision reduction, sanitization, audit event
+- `src/rules/`: one module per concern; register new rules in `src/rules/index.ts`
+- `src/text/`: normalization, URL, markdown and DLP primitives
+- `harness/scenarios/*.yaml`: red-team corpus; `harness/REPORT.md` is generated
+
+## Adding or changing a rule
+
+1. Implement it as a `Rule` in `src/rules/` with an ID, default action, severity and description. Set `locked: true` if it guards an invariant in `SECURITY.md`.
+2. Add unit tests in `test/rules.test.ts`, covering both a hit and a benign near-miss.
+3. Add at least one attack and one benign scenario to the harness.
+4. Run `npm run check` and commit the regenerated `harness/REPORT.md`. If schemas changed, run `npm run schemas` too.
+5. Update the rules table in `README.md`.
+
+## Gotchas
+
+- Rules match on `ctx.normalized.*`, never raw text.
+- Evidence is scrubbed by the engine, but don't put raw sensitive values in `message`.
+- Write invisible Unicode in tests with `String.fromCodePoint`, never as literal characters in source.
 
 ## Style
 
-Use simple TypeScript, explicit types, Zod validation at API boundaries, and unit tests for every policy rule.
+Simple TypeScript, explicit types, Zod validation at API boundaries, and unit tests for every policy rule.

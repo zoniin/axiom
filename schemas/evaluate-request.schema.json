@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "tenantId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "sessionId": {
+      "type": "string",
+      "maxLength": 256
+    },
+    "principal": {
+      "default": {
+        "roles": [],
+        "clearance": "internal"
+      },
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "roles": {
+          "default": [],
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "clearance": {
+          "default": "internal",
+          "type": "string",
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted"
+          ]
+        }
+      }
+    },
+    "input": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "context": {
+      "maxItems": 500,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "tenantId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "trust": {
+            "type": "string",
+            "enum": [
+              "trusted",
+              "internal",
+              "untrusted"
+            ]
+          },
+          "sensitivity": {
+            "default": "internal",
+            "type": "string",
+            "enum": [
+              "public",
+              "internal",
+              "confidential",
+              "restricted"
+            ]
+          },
+          "allowedRoles": {
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 200000
+          },
+          "declassifiedBy": {
+            "type": "string",
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "id",
+          "tenantId",
+          "trust"
+        ]
+      }
+    },
+    "output": {
+      "type": "string",
+      "maxLength": 200000
+    },
+    "actions": {
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "http",
+              "email",
+              "tool",
+              "memory",
+              "export"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "method": {
+            "type": "string",
+            "maxLength": 16
+          },
+          "payload": {}
+        },
+        "required": [
+          "kind",
+          "target"
+        ]
+      }
+    }
+  },
+  "required": [
+    "tenantId"
+  ]
+}
