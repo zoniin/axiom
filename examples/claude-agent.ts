@@ -4,7 +4,7 @@
  *   npm run example:agent        (needs Anthropic credentials: ANTHROPIC_API_KEY or `ant auth login`)
  *
  * The fetch tool returns a page with an embedded prompt injection asking the
- * agent to email the conversation out. Claude will usually ignore it. Axiom
+ * agent to email the conversation out. Claude will usually ignore it. Axiom Guard
  * makes that irrelevant: while the page is in context, any side effect needs
  * approval, and an address that came from the page is blocked outright.
  * Tools are simulated locally; nothing is fetched or sent.

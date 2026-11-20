@@ -3,7 +3,7 @@
  *
  *   npm run example
  *
- * Axiom is called twice per turn:
+ * Axiom Guard is called twice per turn:
  *   1. before the model, to authorize retrieved context and label it
  *   2. after the model, to check the output and any proposed actions
  * The second call includes the same context, so taint carries through.

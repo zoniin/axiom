@@ -1,18 +1,18 @@
 # Architecture
 
-Axiom is a policy engine with a thin HTTP and CLI wrapper. The engine is
+Axiom Guard is a policy engine with a thin HTTP and CLI wrapper. The engine is
 synchronous, stateless and deterministic. The only state is the optional
 audit log.
 
 ## Request lifecycle
 
-An application calls Axiom at two points in each turn. Both calls use the
+An application calls Axiom Guard at two points in each turn. Both calls use the
 same request shape, and fields that aren't relevant yet are simply left out.
 
 ```mermaid
 sequenceDiagram
   participant App
-  participant Axiom
+  participant Axiom as Axiom Guard
   participant Model
   participant Sinks as Tools / HTTP / Email / Memory
 

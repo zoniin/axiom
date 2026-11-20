@@ -17,9 +17,9 @@
    and jailbreaks.
 2. **Content author.** Controls something the system later retrieves: an
    upload, a web page, an inbound email, a tool result. This is the
-   indirect-injection attacker, and the main one Axiom is designed for.
+   indirect-injection attacker, and the main one Axiom Guard is designed for.
 3. **Compromised model behavior.** Assume either attacker can make the model
-   emit anything. Axiom's output and action rules don't rely on the model
+   emit anything. Axiom Guard's output and action rules don't rely on the model
    having resisted.
 
 ## Threats → controls → tests
@@ -44,7 +44,7 @@
 
 ## Non-goals and known gaps
 
-These are listed so nobody mistakes Axiom for something it isn't. The
+These are listed so nobody mistakes Axiom Guard for something it isn't. The
 `09-known-gaps.yaml` scenarios pin the current behavior.
 
 - **Semantic detection.** Paraphrased or non-English injections get past
@@ -61,7 +61,7 @@ These are listed so nobody mistakes Axiom for something it isn't. The
 - **Data in an approved destination's path.** Paths on allowlisted hosts are
   scanned for structured identifiers, not for arbitrary encodings. Keep
   `pathPrefix` tight.
-- **Model correctness.** Axiom doesn't check whether an answer is grounded or
+- **Model correctness.** Axiom Guard doesn't check whether an answer is grounded or
   true, only whether it makes a flagged commitment.
 - **Fine-grained taint.** Taint covers the whole turn, not individual
   values. That's conservative, and it means approval prompts fire on any
@@ -70,10 +70,10 @@ These are listed so nobody mistakes Axiom for something it isn't. The
   removal from the start or middle. Deleting the newest events is only
   detectable against an external copy of the latest hash. Ship it somewhere
   the gateway can't write.
-- **Upstream identity.** Axiom trusts `tenantId`, `principal` and chunk
+- **Upstream identity.** Axiom Guard trusts `tenantId`, `principal` and chunk
   metadata from the caller. Those must come from your authenticated session
   and your index, never from the model.
 - **DNS.** Hostnames aren't resolved. A public name that resolves to a
   private address has to be stopped by your egress proxy.
-- **Redirects.** Axiom evaluates the proposed URL. The HTTP client that
+- **Redirects.** Axiom Guard evaluates the proposed URL. The HTTP client that
   executes the action must not follow redirects off the allowlist.

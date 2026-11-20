@@ -36,9 +36,9 @@ Use this file as a working research ledger. Priority clusters:
 - Greshake et al. (2023), "Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection"
 - Rehberger, markdown image exfiltration and Unicode tag "ASCII smuggling" write-ups (embracethered.com)
 
-## How Axiom uses this
+## How Axiom Guard uses this
 
-| Idea | Source | Where in Axiom |
+| Idea | Source | Where in Axiom Guard |
 |---|---|---|
 | Privilege separation between data and control | CaMeL, Progent | Taint rules `AX-ACT-002`/`AX-ACT-003`, coarse-grained because a gateway can't see the plan |
 | Delimiting untrusted data | Spotlighting | `spotlight()` in `src/engine.ts` |
