@@ -54,3 +54,16 @@ jobs:
           docker inspect -f 'health: {{.State.Health.Status}}' axiom
           test "$(docker inspect -f '{{.State.Health.Status}}' axiom)" = healthy
           docker logs axiom
+
+  playground-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run playground:build
+      - run: npm run e2e

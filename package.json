@@ -75,7 +75,8 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "prepare": "npm run build",
-    "pack:test": "node scripts/pack-test.mjs"
+    "pack:test": "node scripts/pack-test.mjs",
+    "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.9",
@@ -98,6 +99,7 @@
     "@vitest/coverage-v8": "^5.1.1",
     "esbuild": "^0.28.2",
     "fast-check": "^4.10.3",
+    "playwright": "1.63.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vitest": "^5.1.1"
