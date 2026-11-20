@@ -34,5 +34,4 @@ export const BUILTIN_RULES: readonly Rule[] = [...AUTHORIZATION_RULES, ...CONTEN
 export const SYSTEM_RULES = {
   internalError: 'AX-SYS-001',
   detectorSignal: 'AX-SYS-002',
-  invalidOverride: 'AX-SYS-003',
 } as const;

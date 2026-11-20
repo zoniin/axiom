@@ -1,3 +1,4 @@
+import { SYSTEM_RULES } from '../rules/index.js';
 import type { EvaluateRequest, Finding } from '../types.js';
 
 /**
@@ -21,8 +22,6 @@ export interface DetectorResult {
   score?: number;
   label?: string;
 }
-
-const DETECTOR_RULE = 'AX-SYS-002';
 
 export async function runDetectors(detectors: Detector[], request: EvaluateRequest, timeoutMs: number): Promise<Finding[]> {
   const jobs: Array<Promise<Finding | undefined>> = [];
@@ -56,7 +55,7 @@ async function runOne(d: Detector, target: string, text: string, timeoutMs: numb
     const r = await Promise.race([d.detect(text, { signal: controller.signal }), timeout]);
     if (r === 'timeout') {
       return {
-        ruleId: DETECTOR_RULE,
+        ruleId: SYSTEM_RULES.detectorSignal,
         stage: 'system',
         action: 'allow',
         severity: 'low',
@@ -67,7 +66,7 @@ async function runOne(d: Detector, target: string, text: string, timeoutMs: numb
     if (!r.flagged) return undefined;
     const score = r.score !== undefined ? ` (score ${r.score.toFixed(2)})` : '';
     return {
-      ruleId: DETECTOR_RULE,
+      ruleId: SYSTEM_RULES.detectorSignal,
       stage: 'system',
       action: 'escalate',
       severity: 'medium',
@@ -76,7 +75,7 @@ async function runOne(d: Detector, target: string, text: string, timeoutMs: numb
     };
   } catch (err) {
     return {
-      ruleId: DETECTOR_RULE,
+      ruleId: SYSTEM_RULES.detectorSignal,
       stage: 'system',
       action: 'allow',
       severity: 'low',
