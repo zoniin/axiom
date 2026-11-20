@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: If you use Axiom Guard in research or a product write-up, please cite it as below.
+title: 'Axiom Guard: deterministic runtime security for LLM applications and agents'
+type: software
+authors:
+  - alias: zoniin
+repository-code: https://github.com/zoniin/axiom
+url: https://zoniin.github.io/axiom/
+license: MIT
+version: 0.5.0
+date-released: 2026-11-20
+keywords:
+  - prompt injection
+  - LLM security
+  - taint tracking
+  - AI agents
+  - data exfiltration
