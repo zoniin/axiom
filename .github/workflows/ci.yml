@@ -50,4 +50,7 @@ jobs:
           for i in $(seq 1 20); do curl -fs localhost:8787/health && break; sleep 1; done
           curl -fs -X POST localhost:8787/v1/evaluate -H 'content-type: application/json' \
             -d '{"tenantId":"t","output":"![](https://evil.example/c?d=1)"}' | grep -q '"decision":"block"'
+          for i in $(seq 1 30); do [ "$(docker inspect -f '{{.State.Health.Status}}' axiom)" = healthy ] && break; sleep 1; done
+          docker inspect -f 'health: {{.State.Health.Status}}' axiom
+          test "$(docker inspect -f '{{.State.Health.Status}}' axiom)" = healthy
           docker logs axiom
