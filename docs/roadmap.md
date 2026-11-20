@@ -1,6 +1,6 @@
 # Roadmap
 
-## Done (v0.4)
+## Done (v0.5)
 
 - Deterministic engine with a decision lattice, locked rules and fail-closed errors
 - Retrieval authorization (tenant, role, clearance) before anything else runs
@@ -17,10 +17,13 @@
 - Runtime-agnostic core and a browser playground on GitHub Pages
 - Agent sessions with persistent taint, and Claude tool-runner integration (`guardTool`)
 - Custom harness runs (`--policy`, `--scenarios`), coverage gates, Docker smoke test
+- Agent replay in the playground; release pipeline with npm provenance; installed-package smoke test
+- CodeQL scanning and Dependabot
 
 ## Next
 
 - **OpenTelemetry spans** per evaluation, using GenAI semantic conventions
+- **npm registry release** (pipeline is ready; needs an `NPM_TOKEN`)
 - **Reference detector adapters** (Prompt Guard, a hosted classifier) shipped as optional packages
 - **Per-tenant policy bundles**, signed, with hot reload
 - **Multilingual injection patterns**, starting with the known-gap scenarios
