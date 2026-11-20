@@ -2,6 +2,13 @@
 
 Axiom Guard is security tooling, so a bypass is a vulnerability.
 
+## Supported versions
+
+| Version | Supported |
+|---|---|
+| 0.5.x | Yes |
+| < 0.5 | No. Upgrade; earlier versions miss fixes for bypasses found by fuzzing (see CHANGELOG.md). |
+
 ## Reporting
 
 Please report bypasses, exfiltration paths or tenant-isolation flaws through
