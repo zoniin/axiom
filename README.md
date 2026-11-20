@@ -1,6 +1,8 @@
 # Axiom Guard
 
 [![CI](https://github.com/zoniin/axiom/actions/workflows/ci.yml/badge.svg)](https://github.com/zoniin/axiom/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/zoniin/axiom?color=4f7cff)](https://github.com/zoniin/axiom/releases)
+[![CodeQL](https://github.com/zoniin/axiom/actions/workflows/codeql.yml/badge.svg)](https://github.com/zoniin/axiom/actions/workflows/codeql.yml)
 [![Playground](https://img.shields.io/badge/playground-live-4f7cff)](https://zoniin.github.io/axiom/)
 ![coverage](https://img.shields.io/badge/coverage-91%25-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-blue)
