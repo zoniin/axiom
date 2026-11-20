@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Browser end-to-end test of the playground (`npm run e2e`) as a CI job.
+- CodeQL code scanning and Dependabot (grouped weekly updates).
+- Docker image OCI labels and a `HEALTHCHECK`; CI waits for the container to report healthy.
+- `CITATION.cff`, `.editorconfig`, and a supported-versions table in `SECURITY.md`.
+
+### Changed
+- GitHub Actions bumped to current majors (checkout v7, setup-node v7, upload-pages-artifact v5, deploy-pages v5).
+- CI cancels superseded pull-request runs.
+
+### Removed
+- Unused `AX-SYS-003` rule ID constant.
+
 ## 0.5.0
 
 ### Added

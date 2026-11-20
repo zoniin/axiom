@@ -11,6 +11,9 @@ npm run check   # lint, typecheck, tests with coverage, harness
 ```
 
 `npm run playground` builds and serves the browser playground locally.
+`npm run e2e` runs the browser end-to-end test against the built playground
+(run `npm run playground:build` first). `npm run pack:test` installs the
+packed tarball into an empty project and exercises it like a consumer.
 
 ## Changing or adding a rule
 
