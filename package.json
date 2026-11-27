@@ -79,8 +79,8 @@
     "e2e": "node scripts/e2e.mjs"
   },
   "dependencies": {
-    "@hono/node-server": "^2.1.9",
-    "hono": "^4.9.0",
+    "@hono/node-server": "^2.1.11",
+    "hono": "^4.13.21",
     "yaml": "^2.8.0",
     "zod": "^4.1.0"
   },
